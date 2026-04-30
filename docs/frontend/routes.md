@@ -17,6 +17,7 @@ Anonymous-friendly. Renders site shell with no auth requirements.app/(public)/
 ├── page.tsx                    # /        Homepage
 ├── explore/page.tsx            # /explore
 ├── live/page.tsx               # /live
+├── setup/page.tsx              # /setup
 ├── pricing/page.tsx            # /pricing
 ├── t/[ticker]/
 │   ├── page.tsx                # /t/AAPL

@@ -25,6 +25,16 @@ Axentra concentrates the format (video + live) and adds verification (read-only 
 - AI summaries on ticker pages.
 - Pricing page (Premium scaffolded; not active in V1).
 
+## Delivery phase shorthand
+
+For planning conversations, we use this shorthand without changing canonical scope docs:
+
+- **V0 / Phase A**: core watch surfaces (video + live).
+- **V1**: canonical repo V1 as defined in `scope-v1.md` (including creator read-only brokerage verification).
+- **V2**: premium viewer-side features (viewer brokerage linking and follow-trade) after V1 ships.
+
+Scope authority remains `scope-v1.md` and `non-goals.md`.
+
 ## What it is **not**
 
 Axentra is a media platform. It does **not**:

@@ -4,6 +4,17 @@ A practical, solo-founder-friendly build order for V1. Four milestones, each end
 
 This doc is a build plan, not a spec. Specs live in the other docs and are referenced inline.
 
+## Naming alignment
+
+To avoid ambiguity between roadmap milestones and product-stage shorthand:
+
+- This document remains the canonical implementation path for repo **V1** (M1-M4).
+- Product shorthand may refer to:
+  - **V0 / Phase A** = M1 + M2 (watch + live foundation),
+  - **V1** = full M1-M4 scope,
+  - **V2** = post-V1 premium viewer-side expansion.
+- Any V2 follow-trade planning must remain outside this file and follow `non-goals.md` constraints until V1 is shipped.
+
 ## Principles
 
 - **Each milestone ends in a demo.** If a milestone doesn't put a real, working surface in front of a real user, it's structured wrong.
@@ -240,4 +251,5 @@ This roadmap intentionally stops at V1 done. Post-V1 candidates exist (viewer ac
 - Auth + RLS: `../backend/auth-rules.md`
 - AI features: `../product/ai-features.md`
 - Brokerage rules: `../product/creator-broker-link.md`
+- V2 follow-trade notes (post-V1): `./v2-follow-trade-notes.md`
 - Skill playbooks for execution: `../../AGENTS.md` §11

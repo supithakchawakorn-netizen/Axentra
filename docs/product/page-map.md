@@ -68,6 +68,14 @@ Legend:
 - CTA: "Join waitlist" → `POST /api/waitlist`.
 - Stripe checkout button visually present but **disabled** in V1 (no live products).
 
+## 🌐 `/setup`
+
+- Integration checklist for switching from demo data to real services.
+- Per-service status: configured vs missing (derived from env presence).
+- Official setup links (Supabase, Mux, LiveKit, OpenAI, PostHog, Sentry, Resend).
+- Required env var list per integration.
+- "What I need from you next" callout for the first missing required integration.
+
 ## 🌐 `/sign-in`
 
 - Google OAuth button.
