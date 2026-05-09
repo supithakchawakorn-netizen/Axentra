@@ -1,19 +1,17 @@
-import { createHmac, timingSafeEqual } from "node:crypto";
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { SnapTradeWebhookEventZ } from "@/types/snaptrade";
+import { verifyHmacSha256Hex } from "@/lib/utils/webhook-signature";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 function verifySignature(raw: string, signature: string | null): boolean {
-  const secret = process.env.SNAPTRADE_WEBHOOK_SECRET;
-  if (!secret || !signature) return false;
-  const expected = createHmac("sha256", secret).update(raw).digest("hex");
-  const a = Buffer.from(expected);
-  const b = Buffer.from(signature);
-  if (a.length !== b.length) return false;
-  return timingSafeEqual(a, b);
+  return verifyHmacSha256Hex({
+    payload: raw,
+    secret: process.env.SNAPTRADE_WEBHOOK_SECRET,
+    signature,
+  });
 }
 
 export async function POST(req: Request) {
