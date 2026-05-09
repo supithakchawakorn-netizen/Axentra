@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 
 export const metadata = {
   title: "Sign in",
-  description: "Sign in to Axentra Studio.",
+  description: "Sign in to Varg Packs Studio.",
 };
 
 interface SignInPageProps {

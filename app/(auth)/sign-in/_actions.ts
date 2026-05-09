@@ -13,30 +13,59 @@ const EmailZ = z.object({
 
 const PROVIDER_NEXT_KEY = "next";
 
-function callbackUrl(next: string): string {
-  const base = siteUrl();
+function normalizeNext(next: string): string {
+  if (!next.startsWith("/") || next.startsWith("//")) {
+    return "/studio";
+  }
+  return next;
+}
+
+async function requestOrigin(): Promise<string> {
+  const headerStore = await headers();
+  const origin = headerStore.get("origin");
+  if (origin) {
+    try {
+      return new URL(origin).origin;
+    } catch {
+      // Ignore malformed origin and continue with host/proto inference.
+    }
+  }
+
+  const host = headerStore.get("x-forwarded-host") ?? headerStore.get("host");
+  if (host) {
+    const proto =
+      headerStore.get("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https");
+    return `${proto}://${host}`;
+  }
+
+  return siteUrl();
+}
+
+function callbackUrl(next: string, base: string): string {
   const url = new URL("/auth/callback", base);
   url.searchParams.set(PROVIDER_NEXT_KEY, next);
   return url.toString();
 }
 
 export async function signInWithEmail(formData: FormData): Promise<void> {
+  const next = normalizeNext(String(formData.get("next") ?? "/studio"));
   const parsed = EmailZ.safeParse({
     email: formData.get("email"),
-    next: formData.get("next") ?? "/studio",
+    next,
   });
   if (!parsed.success) {
     const params = new URLSearchParams({
       error: "Please enter a valid email.",
-      next: String(formData.get("next") ?? "/studio"),
+      next,
     });
     redirect(`/sign-in?${params.toString()}`);
   }
 
   const supabase = await createClient();
+  const base = await requestOrigin();
   const { error } = await supabase.auth.signInWithOtp({
     email: parsed.data.email,
-    options: { emailRedirectTo: callbackUrl(parsed.data.next) },
+    options: { emailRedirectTo: callbackUrl(parsed.data.next, base) },
   });
   if (error) {
     const params = new URLSearchParams({
@@ -50,11 +79,12 @@ export async function signInWithEmail(formData: FormData): Promise<void> {
 }
 
 export async function signInWithGoogle(formData: FormData): Promise<void> {
-  const next = String(formData.get("next") ?? "/studio");
+  const next = normalizeNext(String(formData.get("next") ?? "/studio"));
   const supabase = await createClient();
+  const base = await requestOrigin();
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",
-    options: { redirectTo: callbackUrl(next) },
+    options: { redirectTo: callbackUrl(next, base) },
   });
   if (error || !data.url) {
     const params = new URLSearchParams({
@@ -71,7 +101,3 @@ export async function signOut(): Promise<void> {
   await supabase.auth.signOut();
   redirect("/");
 }
-
-// Mark `headers` as referenced to silence unused warnings if we add IP-based
-// rate limiting here later. (Sign-in OTP is rate-limited by Supabase itself.)
-void headers;
