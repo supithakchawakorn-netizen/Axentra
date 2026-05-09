@@ -270,7 +270,7 @@ on conflict (symbol) do nothing;
 insert into public.tickers (symbol, name, exchange, country)
 select
   'AX' || lpad(gs::text, 4, '0') as symbol,
-  'Axentra Seed Equity ' || lpad(gs::text, 4, '0') as name,
+  'Varg Packs Seed Equity ' || lpad(gs::text, 4, '0') as name,
   'NASDAQ' as exchange,
   'US' as country
 from generate_series(1, 650) as gs

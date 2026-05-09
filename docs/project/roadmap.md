@@ -1,6 +1,6 @@
-md# Roadmap — V1 build order
+# Roadmap — V1 build order
 
-A practical, solo-founder-friendly build order for V1. Four milestones, each ending in something demoable. Strictly within V1 scope (`scope-v1.md`); nothing in `non-goals.md` shows up here, ever.
+A practical, solo-founder-friendly build order for V1. Five milestones, each ending in something demoable. Strictly within V1 scope (`scope-v1.md`); nothing in `non-goals.md` shows up here, ever.
 
 This doc is a build plan, not a spec. Specs live in the other docs and are referenced inline.
 
@@ -8,12 +8,27 @@ This doc is a build plan, not a spec. Specs live in the other docs and are refer
 
 To avoid ambiguity between roadmap milestones and product-stage shorthand:
 
-- This document remains the canonical implementation path for repo **V1** (M1-M4).
+- This document remains the canonical implementation path for repo **V1** (M1-M5).
 - Product shorthand may refer to:
   - **V0 / Phase A** = M1 + M2 (watch + live foundation),
-  - **V1** = full M1-M4 scope,
-  - **V2** = post-V1 premium viewer-side expansion.
+  - **V1** = full M1-M5 scope (including monetization),
+  - **V2** = post-V1 viewer brokerage and follow-trade expansion.
 - Any V2 follow-trade planning must remain outside this file and follow `non-goals.md` constraints until V1 is shipped.
+
+## Current implementation snapshot
+
+What exists now:
+
+- Public routes for home, explore, live, ticker, video, room, creator profile, pricing, setup, and legal pages.
+- Creator studio routes include overview, videos, upload, live, live detail, broker, settings, and analytics.
+- Comment surfaces on watch/live pages are currently read-only demo UX in V1.
+- Studio guest preview mode can be enabled for local UX iteration without auth.
+
+Planned next (inside V1 hardening):
+
+- Complete external provider credentials and webhook validation in deployed environments.
+- Expand integration test depth and runbook execution in release workflow.
+- Maintain strict non-goals boundaries (no trade execution, no viewer brokerage, no chart UI).
 
 ## Principles
 
@@ -25,7 +40,7 @@ To avoid ambiguity between roadmap milestones and product-stage shorthand:
 
 ## Out of every milestone (re-stated)
 
-Nothing in `non-goals.md` appears in any milestone. Specifically: no viewer accounts, no viewer brokerage, no trade execution, no copy trading, no follow-trade, no pooled capital, no native app, **no chart UI of any kind including sparklines**, no anonymous chat writes.
+Nothing in `non-goals.md` appears in any milestone. Specifically: no viewer brokerage, no trade execution, no copy trading, no follow-trade, no pooled capital, no native app, **no chart UI of any kind including sparklines**, no anonymous chat writes.
 
 ---
 
@@ -53,7 +68,7 @@ Nothing in `non-goals.md` appears in any milestone. Specifically: no viewer acco
 - Supabase Auth: Google OAuth + email magic link configured in the Supabase dashboard. `handle_new_user` trigger creates the `profiles` row.
 - Server Actions in `_actions.ts` files: `createVideoUpload`, `editVideo`, `setVisibility`, `deleteVideo`, `updateProfile`.
 - Route Handlers (only): `/api/webhooks/mux` for `video.asset.ready` and `video.asset.errored`.
-- Middleware (`middleware.ts`) gating `/studio/:path*`.
+- Proxy (`proxy.ts`) gating `/studio/:path*`.
 - `lib/supabase/{client,server,admin,middleware}.ts`.
 - `lib/mux/` typed wrapper exposing only direct-upload, asset-read, and webhook-verify methods.
 - `lib/posthog/` initialized; events `creator_signup`, `creator_signin`, `video_upload_start`, `video_upload_complete`, `video_view`, `video_play`.
@@ -180,16 +195,16 @@ Broker, pricing, waitlist, account deletion, full settings polish.
 
 ---
 
-## Milestone 4 — Trust + waitlist
+## Milestone 4 — Trust foundation (broker + account lifecycle)
 
-**Goal.** Creators can connect a brokerage read-only via SnapTrade, choose what's visible per field, and earn a verified badge that appears on their profile / videos / rooms. Pricing page captures waitlist signups. Analytics and error monitoring reach full V1 coverage. V1 complete.
+**Goal.** Creators can connect a brokerage read-only via SnapTrade, choose what's visible per field, and earn a verified badge that appears on their profile / videos / rooms. Account deletion and lifecycle hygiene are production-ready before monetization rollout.
 
-**Why last.** SnapTrade prod approval is the slowest external dependency; applying on day one of M1 means it's ready when this milestone starts. The verified badge needs a body of content (M1–M3) for the credibility loop to make sense. Pricing/waitlist is intentionally last so the page can describe a real product, not a sketch.
+**Why now.** SnapTrade prod approval is the slowest external dependency; applying on day one of M1 means it's ready when this milestone starts. The verified badge needs a body of content (M1–M3) for the credibility loop to make sense, and lifecycle hardening should land before paid support flows.
 
 ### Pages
 
 - `/studio/broker` (`app/(creator)/studio/broker/page.tsx` + `_actions.ts`) — connect, visibility toggles, refresh, disconnect.
-- `/pricing` (`app/(public)/pricing/page.tsx`) with "Join waitlist" form. Stripe checkout button rendered but disabled.
+- `/pricing` (`app/(public)/pricing/page.tsx`) prepared for monetization policy content in M5.
 - Update `/u/[handle]` — add Activity tab (positions / balances / activity, each gated by `broker_visibility` via `public_broker_*` views), add verified badge.
 - Update `/v/[videoId]` and `/room/[roomId]` — verified badge on creator strip.
 - Update `/studio/settings` — danger zone: delete account.
@@ -197,24 +212,23 @@ Broker, pricing, waitlist, account deletion, full settings polish.
 ### Backend / data
 
 - Migration `0004_broker.sql` — `broker_connections`, `broker_accounts`, `broker_positions`, `broker_activities`, `broker_visibility`. Public views `public_broker_accounts`, `public_broker_positions`, `public_broker_activities`. `maintain_verified_broker` trigger on `broker_visibility` and `broker_connections` that maintains `profiles.verified_broker`. Vault extension enabled if not already.
-- Migration `0005_waitlist_subscriptions.sql` — `waitlist`, scaffolded `subscriptions` (Stripe-shaped, no live policies that allow `authenticated` writes).
+- Migration `0005_account_lifecycle.sql` — account-lifecycle and cleanup support required for safe monetization rollout.
 - Server Actions: `connectBrokerage`, `refreshBrokerage`, `setBrokerVisibility`, `disconnectBrokerage`, `deleteAccount`.
 - Route Handlers:
   - `/api/webhooks/snaptrade` — connection lifecycle + sync hints.
-  - `/api/webhooks/stripe` — scaffolded; verifies signature, parses, no-ops in V1 (no live products).
+  - `/api/webhooks/stripe` — payment webhook foundation, signature-verified and idempotent.
   - `/api/cron/snaptrade-sync` — every 30 min for currently-live creators, daily for others.
-  - `POST /api/waitlist` — rate-limited, single-purpose insert.
 - `lib/snaptrade/` exposes only read endpoints (`accounts`, `balances`, `positions`, `activities`). Order endpoints are not imported. This is reviewed in PR.
 - Supabase Vault: `snaptrade_user_secret` stored as a Vault secret; `broker_connections.snaptrade_user_secret_id` references it.
 - Sentry: scrubbing rule for `/api/webhooks/snaptrade` and any path under `/studio/broker`.
-- PostHog: full event coverage from `frontend-rules.md` §11 — broker events + `waitlist_submit`.
+- PostHog: full event coverage from `frontend-rules.md` §11 for broker and account-lifecycle events.
 
 ### Integrations
 
 - SnapTrade (read-only; production credentials).
-- Stripe (scaffolded; no live products, no checkout enabled).
+- Stripe webhook foundation required for M5 gift/donation settlement.
 - Supabase Vault.
-- Rate limiting on `POST /api/waitlist` and `POST /api/livekit/viewer-token` (the latter from M2; verify still in place).
+- Rate limiting on unauthenticated POST routes (including `POST /api/livekit/viewer-token`) remains enforced.
 
 ### Definition of done
 
@@ -224,21 +238,77 @@ Broker, pricing, waitlist, account deletion, full settings polish.
 - Cron sync refreshes `broker_*` rows on schedule and on creator-triggered "Refresh".
 - Disconnect removes the Vault secret, clears `broker_*` rows for that connection, and removes the badge via the trigger.
 - Delete account: cascades through `profiles` → all owned content; SnapTrade `deleteSnapTradeUser` is called first; Vault secret row is deleted; auth user is removed.
-- `POST /api/waitlist` rejects bursts from a single IP. A duplicate email returns success-shaped (no leak about existing rows).
-- Stripe webhook verifies signatures and 200s on a no-op; an integration test covers a sample webhook payload.
+- Stripe webhook verifies signatures and idempotent event handling with integration test coverage.
 - A code review confirms no SnapTrade order endpoint is imported anywhere in the repo.
 - All M1–M4 PostHog events firing in production. Sentry captures both server and client errors with proper scrubbing.
 - `pnpm lint && pnpm typecheck && pnpm test && pnpm build` green. Migrations apply cleanly on a fresh DB (`pnpm db:reset`).
 
-### Out of scope for M4 (and V1 entirely)
+### Out of scope for M4
 
-Everything in `non-goals.md`. Notably: no live Premium subscriptions, no follow-trade UI or DB columns, no viewer-side broker linking, no chart UI.
+Everything in `non-goals.md`. Notably: no paid creator subscriptions, no paid live-room gating, no follow-trade UI or DB columns, no viewer-side broker linking, no chart UI.
+
+---
+
+## Milestone 5 — Monetization (gifts, donations, ads)
+
+**Goal.** Viewers can support creators via donations and gifts, gifts can unlock creator-scoped ad-free windows, and display + video ad delivery runs with entitlement-aware suppression.
+
+**Why now.** Monetization is added after the trust and content surfaces from M1-M4 are stable, so support actions happen on real watch/live volume rather than empty pages.
+
+### Pages
+
+- Update `/v/[videoId]` with donation and gift entrypoints.
+- Update `/room/[roomId]` with live gift entrypoint.
+- Update `/pricing` to explain gift tiers, donation policy, and creator-scoped ad-free behavior.
+- Add creator monetization analytics surfaces in `/studio` (new section or tab).
+
+### Backend / data
+
+- Migration `0006_monetization_core.sql`:
+  - `payment_attempts`,
+  - `creator_support_ledger`,
+  - `creator_ad_free_entitlements`,
+  - idempotency constraints, indexes, and RLS.
+- Migration `0007_monetization_gifts_ads.sql`:
+  - `gift_catalog`,
+  - `gift_grants`,
+  - `ad_impressions`,
+  - `ad_decisions_audit`,
+  - payout rollup tables.
+- Route Handlers:
+  - `POST /api/monetization/checkout`,
+  - `GET /api/monetization/checkout/:id`,
+  - `POST /api/webhooks/payments`,
+  - `POST /api/ads/decision`.
+- Optional internal recompute endpoint:
+  - `POST /api/monetization/entitlements/recompute` (cron/admin only).
+
+### Integrations
+
+- Stripe for payment intents and settlement webhooks.
+- Ad provider(s) for display and video inventory.
+- PostHog + Sentry coverage for monetization and ad-decision paths.
+
+### Definition of done
+
+- Anonymous viewer can complete a donation and see settled confirmation.
+- Account viewer can complete a gift and see entitlement reflected in ad suppression behavior.
+- Creator-scoped ad-free suppresses ads only on supported creator surfaces.
+- Refund and chargeback flows revoke or adjust entitlements correctly.
+- Webhook replay and idempotency tests pass.
+- `pnpm lint && pnpm typecheck && pnpm test && pnpm build` green.
+
+### Out of scope for M5
+
+- Paid creator subscriptions.
+- Paid live-room gating.
+- Platform-wide ad-free unlock from gifts.
 
 ---
 
 ## After V1
 
-This roadmap intentionally stops at V1 done. Post-V1 candidates exist (viewer accounts, follow-trade with the strict rules in `non-goals.md`, monetization, native app) but those belong in a `roadmap-v2.md` written after V1 ships and after real usage exists to prioritize against. Do not pull post-V1 work forward into M1–M4.
+This roadmap intentionally stops at V1 done. Post-V1 candidates exist (viewer brokerage linking, follow-trade with the strict rules in `non-goals.md`, native app) but those belong in a `roadmap-v2.md` written after V1 ships and after real usage exists to prioritize against. Do not pull post-V1 work forward into M1–M5.
 
 ## Cross-references
 
@@ -251,5 +321,6 @@ This roadmap intentionally stops at V1 done. Post-V1 candidates exist (viewer ac
 - Auth + RLS: `../backend/auth-rules.md`
 - AI features: `../product/ai-features.md`
 - Brokerage rules: `../product/creator-broker-link.md`
+- V1 monetization notes: `./v1-monetization-notes.md`
 - V2 follow-trade notes (post-V1): `./v2-follow-trade-notes.md`
 - Skill playbooks for execution: `../../AGENTS.md` §11

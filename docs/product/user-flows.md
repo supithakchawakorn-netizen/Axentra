@@ -91,8 +91,26 @@ See `docs/product/creator-broker-link.md`. High-level:
 - `/studio/live`: schedule rooms, see past sessions and recordings.
 - `/studio/settings`: handle, display name, avatar, bio, social links, notification prefs.
 
-## 10. Pricing (V1 placeholder)
+## 10. Viewer — sends donation or gift
+
+1. Viewer visits `/v/[videoId]` or `/room/[roomId]` and taps "Support creator".
+2. Viewer selects either:
+   - donation (custom amount), or
+   - gift SKU (fixed amount and optional ad-free grant).
+3. Server creates a payment intent and returns checkout session details.
+4. Payment provider webhook confirms settlement.
+5. Server writes support ledger rows and grants/extends creator-scoped ad-free entitlement when eligible.
+6. Viewer sees settlement success and support confirmation.
+
+## 11. Viewer — receives creator-scoped ad-free after gift
+
+1. Viewer lands on content by the same creator they supported.
+2. Ad decision layer checks entitlement by subject id + creator id + time window.
+3. If active, ads are suppressed only on that creator's surfaces.
+4. Ads continue on other creators' surfaces unless separate entitlements exist.
+
+## 12. Pricing and monetization policy
 
 1. User visits `/pricing`.
-2. Page lists Free and Premium plans with features.
-3. CTA: "Join waitlist" writes to `waitlist` (rate-limited Route Handler `POST /api/waitlist`). The Stripe checkout button is disabled in V1.
+2. Page explains donations, gift tiers, and creator-scoped ad-free rules.
+3. Page links to support flow entrypoints and policy details.

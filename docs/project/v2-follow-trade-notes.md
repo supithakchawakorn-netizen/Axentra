@@ -12,7 +12,7 @@ individual linked brokerage accounts.
 
 - No pooled capital.
 - No fund-like or managed-money structure.
-- Axentra does not execute trades as principal/custodian.
+- Varg Packs does not execute trades as principal/custodian.
 - Execution happens through each viewer's own linked brokerage account.
 - Follow-trade implementation starts only after V1 is shipped.
 

@@ -1,4 +1,4 @@
-md# AGENTS.md — Axentra repo brain
+md# AGENTS.md — Varg Packs repo brain
 
 This file is the **single source of truth** for agentic coding in this repo. Claude Code, Cursor, and human contributors all read this first. `CLAUDE.md` and `.cursorrules` are pointers to this file.
 
@@ -8,7 +8,7 @@ If something here conflicts with a doc under `docs/`, fix the doc and keep this 
 
 ## 1. Mission (one paragraph)
 
-Axentra is a web-first video and live platform for retail market commentary. Anyone can watch videos and live rooms without signing in. Creators sign in to publish, host live rooms, and (optionally) link a brokerage account read-only so viewers can verify their positions and performance. V1 is a media product, not a trading product.
+Varg Packs is a web-first video and live platform for retail market commentary. Anyone can watch videos and live rooms without signing in. Creators sign in to publish, host live rooms, and (optionally) link a brokerage account read-only so viewers can verify their positions and performance. V1 is a media product, not a trading product.
 
 ---
 
@@ -22,12 +22,14 @@ V1 ships:
 - Video watch page (Mux), live room page (LiveKit)
 - AI ticker / news summaries (OpenAI, cached, regenerated only via cron)
 - Creator-side brokerage link (SnapTrade, **read-only**)
-- Pricing page (UI only; Stripe scaffolded, no live Premium yet)
+- Creator monetization: viewer donations, gift SKUs, creator-scoped ad-free unlock
+- Display + video ads with entitlement-aware suppression
+- Pricing page and monetization policy surfaces
 - Web only. PWA manifest is allowed; no React Native, no Capacitor, no native shells.
 
 V1 **does not** ship:
 
-- Viewer accounts, viewer sign-in, follows, playlists, watch history, bookmarks
+- Viewer social graph features (follows, playlists, public viewer profiles, social notifications)
 - Viewer brokerage linking
 - Trade execution of any kind
 - Copy trading
@@ -53,7 +55,7 @@ See `docs/project/scope-v1.md` and `docs/project/non-goals.md` for the canonical
 | VOD | Mux | Direct upload, signed playback for unlisted, public for listed. |
 | Live | LiveKit | Cloud rooms; tokens minted server-side; recording via Egress. |
 | Brokerage | SnapTrade | **Creators only. Read-only. No order endpoints used.** |
-| Payments | Stripe | Wired but Premium features inactive in V1. |
+| Payments | Stripe | Gift/donation checkout + settlement webhook + entitlement lifecycle in V1. |
 | AI | OpenAI | Ticker and news summaries. Server-side. Cached. Regenerated via cron only. |
 | Analytics | PostHog | **EU cloud** (single region across the project). Anonymous distinct IDs for viewers. |
 | Errors | Sentry | Both server and client. Webhook bodies scrubbed. |

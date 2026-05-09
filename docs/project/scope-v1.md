@@ -13,7 +13,7 @@ This document is the **canonical V1 scope**. If a feature is not on this list, t
 - **Creator profile** (`/@[handle]`) — bio, avatar, banner, social links, optional brokerage badge, video grid, scheduled live rooms. URL keeps the `@` via Next.js rewrite (see `routes.md`).
 - **Video watch page** (`/v/[videoId]`) — Mux player, title, description, creator strip, ticker chips, related videos.
 - **Live room watch page** (`/room/[roomId]`) — LiveKit viewer, **read-only chat for everyone except the creator and creator-invited co-hosts**, creator strip, ticker chips.
-- **Pricing page** (`/pricing`) — Premium plan listed; CTA captures interest. Stripe wiring scaffolded but Premium features inactive in V1.
+- **Pricing page** (`/pricing`) — monetization explainer for gifts/donations and creator-scoped ad-free policy.
 
 ### Creator surfaces (auth required)
 
@@ -29,7 +29,7 @@ This document is the **canonical V1 scope**. If a feature is not on this list, t
 
 - **Read**: anyone (anonymous included) sees chat messages.
 - **Write**: only the creator and co-hosts the creator explicitly invited via a one-time publisher-token link.
-- No anonymous chat writes. No viewer-account chat writes (viewer accounts are out of V1).
+- No anonymous chat writes. Viewer chat-write remains out of V1.
 
 ### AI features
 
@@ -41,6 +41,14 @@ This document is the **canonical V1 scope**. If a feature is not on this list, t
 - SnapTrade connect flow.
 - Read positions, balances, and recent activity windows. **No order endpoints used.**
 - Creator chooses which fields are visible publicly. See `docs/product/creator-broker-link.md`.
+
+### Creator monetization (V1)
+
+- **Donations** — one-time support to creators from viewers (anonymous and account-based paths).
+- **Gifts** — fixed SKU support actions that can grant creator-scoped ad-free windows.
+- **Creator-scoped ad-free** — entitlement-based ad suppression on a specific creator's surfaces only.
+- **Ad stack** — display and video ads with entitlement-aware suppression and frequency controls.
+- **Settlement and entitlement lifecycle** — payment-intent create, webhook-confirmed settlement, idempotent ledger writes, entitlement grant/revoke.
 
 ### Cross-cutting
 

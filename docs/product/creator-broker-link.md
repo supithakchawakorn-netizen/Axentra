@@ -73,4 +73,4 @@ Creators can connect a brokerage account through SnapTrade so viewers can verify
 
 - Not a chart terminal.
 - Not a place to enter or modify orders.
-- Not a fund. Axentra never holds, pools, or routes user funds. See `docs/project/non-goals.md`.
+- Not a fund. Varg Packs never holds, pools, or routes user funds. See `docs/project/non-goals.md`.

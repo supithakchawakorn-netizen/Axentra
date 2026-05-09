@@ -4,10 +4,10 @@ Things that are explicitly **not** in V1. Some are deferred; some are permanent.
 
 ## Deferred (may return in later versions, with rules)
 
-### Viewer accounts and social features
+### Viewer social features
 
-- Viewer sign-up, profiles, follows, playlists, watch history, bookmarks, saved tickers, notifications.
-- V1 is anonymous-watch first. Viewer accounts are deferred to V1.x at the earliest.
+- Viewer follows, playlists, social graph, public viewer profiles, saved tickers, and social notifications.
+- V1 keeps anonymous-watch as the default. Viewer accounts, when enabled, are limited to monetization and entitlement history only.
 
 ### Anonymous chat writes
 
@@ -19,7 +19,7 @@ Things that are explicitly **not** in V1. Some are deferred; some are permanent.
 
 ### Premium subscriptions (live)
 
-- The pricing page exists and Stripe is wired, but no Premium features are active in V1. Treat any "gated by Premium" idea as scope creep until a later milestone explicitly enables it.
+- Premium creator subscriptions and paid live-room access remain out of V1. V1 monetization is limited to gifts, donations, and creator-scoped ad-free unlock entitlements.
 
 ### Follow-trade (Premium, later only)
 
@@ -37,9 +37,10 @@ Things that are explicitly **not** in V1. Some are deferred; some are permanent.
 - No chart library is to be added in V1 (`recharts`, `lightweight-charts`, `tradingview-widget`, etc.).
 - Ticker pages display text and content only.
 
-### Creator monetization tools
+### Advanced creator monetization tools
 
-- Tipping, paid subs to creators, paid live rooms, ad revenue share. Out of V1.
+- Paid creator subscriptions and paid live-room gating remain out of V1.
+- Multi-creator pooled sponsorship bundles and fixed-retainer creator deals remain out of V1.
 
 ### Internationalization
 
@@ -49,13 +50,13 @@ Things that are explicitly **not** in V1. Some are deferred; some are permanent.
 
 ### Pooled capital / fund-like products
 
-- Axentra will **never** pool user money, take custody of user funds, or operate anything that resembles a managed fund or copy-trade pool.
+- Varg Packs will **never** pool user money, take custody of user funds, or operate anything that resembles a managed fund or copy-trade pool.
 - Hard constraint for legal and product reasons. Any task that drifts toward pooling capital must be rejected, regardless of how it is framed.
 
-### Trade execution by Axentra
+### Trade execution by Varg Packs
 
-- Axentra will not place orders on behalf of users from its own infrastructure or under its own brokerage relationship.
-- Even when follow-trade ships, execution happens **inside the user's own linked brokerage account**, initiated through that broker's own connection. Axentra is never the executing party.
+- Varg Packs will not place orders on behalf of users from its own infrastructure or under its own brokerage relationship.
+- Even when follow-trade ships, execution happens **inside the user's own linked brokerage account**, initiated through that broker's own connection. Varg Packs is never the executing party.
 
 ### Order endpoints on the SnapTrade integration
 
