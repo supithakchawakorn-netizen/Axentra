@@ -1,5 +1,5 @@
-export const VIEW_MODE_KEY = "axentra-view-mode";
-export const VIEW_MODE_MANUAL_KEY = "axentra-view-mode-manual";
+export const VIEW_MODE_KEY = "vargpacks-view-mode";
+export const VIEW_MODE_MANUAL_KEY = "vargpacks-view-mode-manual";
 
 export type ViewMode = "standard" | "luxury";
 

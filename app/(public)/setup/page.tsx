@@ -150,7 +150,7 @@ export default function SetupPage() {
                   rel="noreferrer"
                   className="bg-secondary hover:bg-accent rounded-full px-3 py-1.5"
                 >
-                  Open Axentra runbook
+                  Open Varg Packs runbook
                 </a>
               ) : null}
               {item.install ? (

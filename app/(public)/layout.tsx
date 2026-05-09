@@ -5,6 +5,7 @@ import { RouteDock } from "@/components/layout/route-dock";
 import { DemoModeBanner } from "@/components/shared/demo-mode-banner";
 import { ViewModeExperiment } from "@/components/experiments/view-mode-experiment";
 import { MarketTape } from "@/components/market/market-tape";
+import { MobileBottomNav } from "@/components/layout/mobile-bottom-nav";
 
 export default function PublicLayout({
   children,
@@ -24,9 +25,10 @@ export default function PublicLayout({
         <aside className="sticky top-14 hidden h-[calc(100vh-3.5rem)] w-60 shrink-0 self-start overflow-y-auto lg:block">
           <PublicSidebar />
         </aside>
-        <div className="min-w-0 flex-1">{children}</div>
+        <div className="min-w-0 flex-1 pb-16 lg:pb-0">{children}</div>
       </div>
       <SiteFooter />
+      <MobileBottomNav />
     </div>
   );
 }

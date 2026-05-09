@@ -12,6 +12,10 @@ export const Events = {
   VideoUploadComplete: "video_upload_complete",
   VideoView: "video_view",
   VideoPlay: "video_play",
+  Video25: "video_25",
+  Video50: "video_50",
+  Video75: "video_75",
+  Video100: "video_100",
 
   // M2
   LiveDirectoryView: "live_directory_view",

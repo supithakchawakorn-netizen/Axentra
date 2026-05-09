@@ -1,11 +1,19 @@
 "use client";
 
-export default function SetupError() {
+import { RouteErrorState } from "@/components/shared/route-error-state";
+
+export default function SetupError({
+  error,
+  reset,
+}: {
+  error: Error;
+  reset: () => void;
+}) {
   return (
-    <main className="mx-auto w-full max-w-5xl px-2 py-6">
-      <p className="text-destructive text-sm">
-        Setup assistant failed to load. Please refresh and try again.
-      </p>
-    </main>
+    <RouteErrorState
+      error={error}
+      reset={reset}
+      title="Setup assistant failed to load."
+    />
   );
 }

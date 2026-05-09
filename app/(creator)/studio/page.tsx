@@ -4,6 +4,7 @@ import { getCurrentProfile } from "@/lib/data/profiles";
 import { listVideosByCreator } from "@/lib/data/videos";
 import { PageHeader } from "@/components/shared/page-header";
 import { listDemoStudioVideos, DEMO_STUDIO_PROFILE } from "@/lib/data/demo-studio";
+import { StudioMobileQuickActions } from "@/components/pages/studio/studio-mobile-quick-actions";
 
 export const dynamic = "force-dynamic";
 
@@ -40,6 +41,7 @@ export default async function StudioOverviewPage() {
           Preview mode is active. You can explore all creator surfaces now and sign in later to publish live data.
         </div>
       ) : null}
+      <StudioMobileQuickActions />
 
       <section className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <Card className="glass-panel">
@@ -126,7 +128,7 @@ export default async function StudioOverviewPage() {
             <CardTitle>Your public profile</CardTitle>
             <CardDescription>
               {profile
-                ? `axentra at /@${profile.handle}`
+                ? `vargpacks at /@${profile.handle}`
                 : "Set up your profile in settings."}
             </CardDescription>
           </CardHeader>

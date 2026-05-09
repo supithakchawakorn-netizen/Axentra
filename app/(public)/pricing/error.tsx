@@ -1,11 +1,19 @@
 "use client";
 
-export default function PricingError() {
+import { RouteErrorState } from "@/components/shared/route-error-state";
+
+export default function PricingError({
+  error,
+  reset,
+}: {
+  error: Error;
+  reset: () => void;
+}) {
   return (
-    <main className="mx-auto max-w-4xl px-4 py-10">
-      <p className="text-destructive text-sm">
-        Pricing page failed to load. Please refresh and try again.
-      </p>
-    </main>
+    <RouteErrorState
+      error={error}
+      reset={reset}
+      title="Pricing page failed to load."
+    />
   );
 }

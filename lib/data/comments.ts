@@ -67,7 +67,7 @@ const ROOM_COMMENTS: Record<string, DemoComment[]> = {
 const FALLBACK: DemoComment[] = [
   {
     id: "c-fallback-1",
-    author: "AxentraDemo",
+    author: "VargPacksDemo",
     text: "Comments are enabled in demo mode for UI preview.",
     postedAt: "just now",
     likes: 3,

@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" viewBox="0 0 192 192" fill="none">
+  <rect width="192" height="192" rx="28" fill="#05070D" />
+  <rect x="14" y="14" width="164" height="164" rx="24" fill="#0D1420" />
+  <path d="M38 142L58 120L78 138L58 156L38 142Z" fill="#4D6C8E" fill-opacity="0.28" />
+  <path d="M154 142L134 120L114 138L134 156L154 142Z" fill="#4D6C8E" fill-opacity="0.28" />
+  <path d="M28 154L50 132L72 154Z" fill="#3A5471" fill-opacity="0.24" />
+  <path d="M164 154L142 132L120 154Z" fill="#3A5471" fill-opacity="0.24" />
+  <path d="M96 34L118 62H74L96 34Z" fill="#8AC9FF" />
+  <path d="M60 58L84 84L52 88L60 58Z" fill="#57E6EE" />
+  <path d="M132 58L140 88L108 84L132 58Z" fill="#57E6EE" />
+  <path d="M48 92L96 60L144 92L124 140H68L48 92Z" fill="#1A2B40" />
+  <path d="M96 88L114 104L96 130L78 104L96 88Z" fill="#9DD3FF" />
+  <path d="M80 106H90L86 118H76L80 106Z" fill="#57E6EE" />
+  <path d="M102 106H112L116 118H106L102 106Z" fill="#57E6EE" />
+  <path d="M72 148H120" stroke="#2E4E71" stroke-width="8" stroke-linecap="round" />
+</svg>

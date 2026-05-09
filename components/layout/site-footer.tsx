@@ -25,6 +25,15 @@ export function SiteFooter() {
           <Link href="/live" className="glass-panel rounded-full border px-3 py-1">
             Live
           </Link>
+          <Link href="/privacy" className="glass-panel rounded-full border px-3 py-1">
+            Privacy
+          </Link>
+          <Link href="/terms" className="glass-panel rounded-full border px-3 py-1">
+            Terms
+          </Link>
+          <Link href="/risk-disclaimer" className="glass-panel rounded-full border px-3 py-1">
+            Risk
+          </Link>
         </div>
       </div>
     </footer>

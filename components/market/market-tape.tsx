@@ -4,6 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 import { getMarketDataProvider } from "@/lib/market-data/provider";
 import type { MarketQuote } from "@/lib/market-data/types";
 
+const DEFAULT_SYMBOLS = ["SPY", "QQQ", "NVDA", "AAPL", "MSFT"];
+
 function quoteTone(changePercent: number) {
   if (changePercent > 0) return "text-emerald-300";
   if (changePercent < 0) return "text-red-300";
@@ -11,7 +13,7 @@ function quoteTone(changePercent: number) {
 }
 
 export function MarketTape({
-  symbols = ["SPY", "QQQ", "NVDA", "AAPL", "MSFT"],
+  symbols = DEFAULT_SYMBOLS,
   compact = false,
 }: {
   symbols?: string[];
@@ -20,12 +22,24 @@ export function MarketTape({
   const [quotes, setQuotes] = useState<MarketQuote[]>([]);
   const [error, setError] = useState<string | null>(null);
   const provider = useMemo(() => getMarketDataProvider(), []);
+  const symbolKey = useMemo(
+    () =>
+      symbols
+        .map((symbol) => symbol.trim().toUpperCase())
+        .filter(Boolean)
+        .join("|"),
+    [symbols],
+  );
+  const resolvedSymbols = useMemo(() => {
+    const parsed = symbolKey.split("|").filter(Boolean);
+    return parsed.length > 0 ? parsed : DEFAULT_SYMBOLS;
+  }, [symbolKey]);
   const mode = process.env.NEXT_PUBLIC_MARKET_DATA_MODE ?? "demo";
 
   useEffect(() => {
     let cancelled = false;
     void provider
-      .getSnapshot(symbols)
+      .getSnapshot(resolvedSymbols)
       .then((snapshot) => {
         if (cancelled) return;
         setError(null);
@@ -35,7 +49,7 @@ export function MarketTape({
         if (cancelled) return;
         setError(err instanceof Error ? err.message : "Market feed unavailable.");
       });
-    const unsubscribe = provider.subscribe(symbols, (updates) => {
+    const unsubscribe = provider.subscribe(resolvedSymbols, (updates) => {
       if (cancelled) return;
       setQuotes(updates);
     });
@@ -43,7 +57,7 @@ export function MarketTape({
       cancelled = true;
       unsubscribe();
     };
-  }, [provider, symbols]);
+  }, [provider, resolvedSymbols]);
 
   return (
     <section className="glass-panel rounded-xl border px-3 py-2">

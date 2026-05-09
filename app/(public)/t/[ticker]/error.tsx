@@ -1,11 +1,19 @@
 "use client";
 
-export default function TickerError() {
+import { RouteErrorState } from "@/components/shared/route-error-state";
+
+export default function TickerError({
+  error,
+  reset,
+}: {
+  error: Error;
+  reset: () => void;
+}) {
   return (
-    <main className="mx-auto max-w-5xl px-4 py-10">
-      <p className="text-destructive text-sm">
-        Ticker page failed to load. Please refresh and try again.
-      </p>
-    </main>
+    <RouteErrorState
+      error={error}
+      reset={reset}
+      title="Ticker page failed to load."
+    />
   );
 }

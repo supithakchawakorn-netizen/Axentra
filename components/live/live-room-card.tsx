@@ -3,10 +3,20 @@ import Image from "next/image";
 import type { PublicLiveRoom } from "@/lib/data/live-rooms";
 import { StatusPill } from "@/components/shared/status-pill";
 
-export function LiveRoomCard({ room }: { room: PublicLiveRoom }) {
+export function LiveRoomCard({
+  room,
+  prefetch = true,
+}: {
+  room: PublicLiveRoom;
+  prefetch?: boolean;
+}) {
   return (
-    <article className="group">
-      <Link href={`/room/${room.id}`} className="block space-y-2">
+    <article className="group snap-start">
+      <Link
+        href={`/room/${room.id}`}
+        prefetch={prefetch}
+        className="block space-y-2 touch-pan-y transition-transform duration-150 active:scale-[0.99]"
+      >
         <div className="bg-muted premium-lift premium-surface relative aspect-video overflow-hidden rounded-xl border">
           <div className="absolute left-2 top-2 z-10">
             <StatusPill label="Live" tone="live" className="uppercase tracking-wider" />
@@ -17,7 +27,7 @@ export function LiveRoomCard({ room }: { room: PublicLiveRoom }) {
           <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
         </div>
         <div className="soft-enter flex items-start gap-3">
-          <div className="bg-muted relative size-8 shrink-0 overflow-hidden rounded-full border">
+          <div className="bg-muted relative size-9 shrink-0 overflow-hidden rounded-full border">
             {room.creator?.avatar_url ? (
               <Image
                 src={room.creator.avatar_url}

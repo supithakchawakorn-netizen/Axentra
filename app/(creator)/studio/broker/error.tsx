@@ -1,11 +1,19 @@
 "use client";
 
-export default function BrokerError() {
+import { RouteErrorState } from "@/components/shared/route-error-state";
+
+export default function BrokerError({
+  error,
+  reset,
+}: {
+  error: Error;
+  reset: () => void;
+}) {
   return (
-    <div className="mx-auto max-w-2xl">
-      <p className="text-destructive text-sm">
-        Broker settings failed to load. Please refresh and try again.
-      </p>
-    </div>
+    <RouteErrorState
+      error={error}
+      reset={reset}
+      title="Broker settings failed to load."
+    />
   );
 }

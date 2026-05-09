@@ -14,8 +14,8 @@ describe("siteUrl", () => {
   });
 
   it("strips a trailing slash", () => {
-    process.env.NEXT_PUBLIC_SITE_URL = "https://axentra.app/";
-    expect(siteUrl()).toBe("https://axentra.app");
+    process.env.NEXT_PUBLIC_SITE_URL = "https://vargpacks.com/";
+    expect(siteUrl()).toBe("https://vargpacks.com");
   });
 
   it("returns the configured URL otherwise", () => {
