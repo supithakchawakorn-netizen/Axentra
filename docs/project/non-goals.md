@@ -1,4 +1,4 @@
-md# Non-goals — V1
+# Non-goals — V1
 
 Things that are explicitly **not** in V1. Some are deferred; some are permanent. Both are off-limits right now.
 

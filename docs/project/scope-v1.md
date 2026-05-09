@@ -1,4 +1,4 @@
-md# Scope — V1
+# Scope — V1
 
 This document is the **canonical V1 scope**. If a feature is not on this list, treat it as out of scope.
 

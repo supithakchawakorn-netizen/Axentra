@@ -128,7 +128,7 @@ export default async function StudioOverviewPage() {
             <CardTitle>Your public profile</CardTitle>
             <CardDescription>
               {profile
-                ? `vargpacks at /@${profile.handle}`
+                ? `Public profile at /@${profile.handle}`
                 : "Set up your profile in settings."}
             </CardDescription>
           </CardHeader>

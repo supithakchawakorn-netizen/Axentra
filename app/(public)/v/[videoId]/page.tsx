@@ -7,6 +7,7 @@ import { listCommentsForVideo } from "@/lib/data/comments";
 import { ExperimentQualitySignal } from "@/components/experiments/experiment-quality-signal";
 import { VideoMobile } from "@/components/pages/video/video-mobile";
 import { VideoDesktop } from "@/components/pages/video/video-desktop";
+import { MobileDesktopSwitch } from "@/components/layout/mobile-desktop-switch";
 
 export const revalidate = 60;
 
@@ -56,26 +57,28 @@ export default async function VideoPage({ params, searchParams }: VideoPageProps
   return (
     <>
       <ExperimentQualitySignal signal="watch_page_entry" path={`/v/${video.id}`} />
-      <div className="sm:hidden">
-        <VideoMobile
-          video={video}
-          tickers={tickers}
-          recommended={recommended}
-          demoMode={demoMode}
-          comments={comments}
-          startAtSeconds={startAtSeconds}
-        />
-      </div>
-      <div className="hidden sm:block">
-        <VideoDesktop
-          video={video}
-          tickers={tickers}
-          recommended={recommended}
-          demoMode={demoMode}
-          comments={comments}
-          startAtSeconds={startAtSeconds}
-        />
-      </div>
+      <MobileDesktopSwitch
+        mobile={
+          <VideoMobile
+            video={video}
+            tickers={tickers}
+            recommended={recommended}
+            demoMode={demoMode}
+            comments={comments}
+            startAtSeconds={startAtSeconds}
+          />
+        }
+        desktop={
+          <VideoDesktop
+            video={video}
+            tickers={tickers}
+            recommended={recommended}
+            demoMode={demoMode}
+            comments={comments}
+            startAtSeconds={startAtSeconds}
+          />
+        }
+      />
     </>
   );
 }

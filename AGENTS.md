@@ -1,4 +1,4 @@
-md# AGENTS.md — Varg Packs repo brain
+# AGENTS.md — Varg Packs repo brain
 
 This file is the **single source of truth** for agentic coding in this repo. Claude Code, Cursor, and human contributors all read this first. `CLAUDE.md` and `.cursorrules` are pointers to this file.
 

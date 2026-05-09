@@ -1,4 +1,4 @@
-md# V2 follow-trade notes (post-V1)
+# V2 follow-trade notes (post-V1)
 
 This document is forward-looking only. It does not change V1 scope.
 

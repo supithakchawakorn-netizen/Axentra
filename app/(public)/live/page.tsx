@@ -5,6 +5,7 @@ import { PageViewEvent } from "@/components/analytics/page-view-event";
 import { Events } from "@/lib/posthog/events";
 import { LiveMobile } from "@/components/pages/live/live-mobile";
 import { LiveDesktop } from "@/components/pages/live/live-desktop";
+import { MobileDesktopSwitch } from "@/components/layout/mobile-desktop-switch";
 
 export const revalidate = 30;
 
@@ -23,12 +24,7 @@ export default async function LivePage() {
         properties={{ room_count: rooms.length }}
       />
       <ExperimentQualitySignal signal="route_continuation" path="/live" />
-      <div className="sm:hidden">
-        <LiveMobile rooms={rooms} />
-      </div>
-      <div className="hidden sm:block">
-        <LiveDesktop rooms={rooms} />
-      </div>
+      <MobileDesktopSwitch mobile={<LiveMobile rooms={rooms} />} desktop={<LiveDesktop rooms={rooms} />} />
     </>
   );
 }

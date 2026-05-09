@@ -1,4 +1,4 @@
-md# Creator brokerage link — read-only
+# Creator brokerage link — read-only
 
 Creators can connect a brokerage account through SnapTrade so viewers can verify their positions and activity. This is a **trust feature**, not a trading feature.
 

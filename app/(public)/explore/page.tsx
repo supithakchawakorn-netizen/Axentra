@@ -11,6 +11,7 @@ import { ExperimentQualitySignal } from "@/components/experiments/experiment-qua
 import { defaultFeedRanker } from "@/lib/feed/ranker";
 import { ExploreMobile } from "@/components/pages/explore/explore-mobile";
 import { ExploreDesktop } from "@/components/pages/explore/explore-desktop";
+import { MobileDesktopSwitch } from "@/components/layout/mobile-desktop-switch";
 
 export const revalidate = 60;
 
@@ -103,28 +104,30 @@ export default async function ExplorePage({
         event={Events.ExploreView}
         properties={tickerRow ? { ticker_id: tickerRow.id, symbol: tickerRow.symbol } : undefined}
       />
-      <div className="sm:hidden">
-        <ExploreMobile
-          query={query}
-          normalizedQuery={normalizedQuery}
-          tickerSymbol={tickerSymbol}
-          tickerRow={tickerRow}
-          rankedLive={rankedLive}
-          rankedVideos={rankedVideos}
-          topTickers={topTickers}
-        />
-      </div>
-      <div className="hidden sm:block">
-        <ExploreDesktop
-          query={query}
-          normalizedQuery={normalizedQuery}
-          tickerSymbol={tickerSymbol}
-          tickerRow={tickerRow}
-          rankedLive={rankedLive}
-          rankedVideos={rankedVideos}
-          topTickers={topTickers}
-        />
-      </div>
+      <MobileDesktopSwitch
+        mobile={
+          <ExploreMobile
+            query={query}
+            normalizedQuery={normalizedQuery}
+            tickerSymbol={tickerSymbol}
+            tickerRow={tickerRow}
+            rankedLive={rankedLive}
+            rankedVideos={rankedVideos}
+            topTickers={topTickers}
+          />
+        }
+        desktop={
+          <ExploreDesktop
+            query={query}
+            normalizedQuery={normalizedQuery}
+            tickerSymbol={tickerSymbol}
+            tickerRow={tickerRow}
+            rankedLive={rankedLive}
+            rankedVideos={rankedVideos}
+            topTickers={topTickers}
+          />
+        }
+      />
     </>
   );
 }

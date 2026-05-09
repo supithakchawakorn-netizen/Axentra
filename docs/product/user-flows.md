@@ -1,4 +1,4 @@
-md# User flows — V1
+# User flows — V1
 
 Step-by-step flows for the primary user journeys. Use these as the spec when building pages, server actions, and webhook handlers.
 

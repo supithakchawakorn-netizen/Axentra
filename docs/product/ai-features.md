@@ -1,4 +1,4 @@
-md# AI features — V1
+# AI features — V1
 
 V1 uses OpenAI for two narrow features:
 

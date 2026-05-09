@@ -7,6 +7,7 @@ import { Events } from "@/lib/posthog/events";
 import { defaultFeedRanker } from "@/lib/feed/ranker";
 import { HomeDesktop } from "@/components/pages/home/home-desktop";
 import { HomeMobile } from "@/components/pages/home/home-mobile";
+import { MobileDesktopSwitch } from "@/components/layout/mobile-desktop-switch";
 
 export const revalidate = 60;
 
@@ -28,12 +29,10 @@ export default async function HomePage() {
   return (
     <>
       <PageViewEvent event={Events.HomeView} />
-      <div className="sm:hidden">
-        <HomeMobile videos={rankedVideos} live={rankedLive} topTickers={topTickers} />
-      </div>
-      <div className="hidden sm:block">
-        <HomeDesktop videos={rankedVideos} live={rankedLive} topTickers={topTickers} />
-      </div>
+      <MobileDesktopSwitch
+        mobile={<HomeMobile videos={rankedVideos} live={rankedLive} topTickers={topTickers} />}
+        desktop={<HomeDesktop videos={rankedVideos} live={rankedLive} topTickers={topTickers} />}
+      />
     </>
   );
 }

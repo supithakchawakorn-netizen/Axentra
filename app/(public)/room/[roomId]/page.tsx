@@ -13,6 +13,7 @@ import { PageViewEvent } from "@/components/analytics/page-view-event";
 import { Events } from "@/lib/posthog/events";
 import { RoomMobileLive } from "@/components/pages/room/room-mobile-live";
 import { RoomDesktopLive } from "@/components/pages/room/room-desktop-live";
+import { MobileDesktopSwitch } from "@/components/layout/mobile-desktop-switch";
 
 export const dynamic = "force-dynamic";
 
@@ -122,24 +123,26 @@ export default async function RoomPage({ params }: Props) {
         properties={{ room_id: room.id, status: room.status, mode: "live_page" }}
       />
       <ExperimentQualitySignal signal="watch_page_entry" path={`/room/${room.id}`} />
-      <div className="sm:hidden">
-        <RoomMobileLive
-          room={room}
-          tickers={tickers}
-          comments={comments}
-          demoBanner={demoBanner}
-          demoMode={demoMode}
-        />
-      </div>
-      <div className="hidden sm:block">
-        <RoomDesktopLive
-          room={room}
-          tickers={tickers}
-          comments={comments}
-          demoBanner={demoBanner}
-          demoMode={demoMode}
-        />
-      </div>
+      <MobileDesktopSwitch
+        mobile={
+          <RoomMobileLive
+            room={room}
+            tickers={tickers}
+            comments={comments}
+            demoBanner={demoBanner}
+            demoMode={demoMode}
+          />
+        }
+        desktop={
+          <RoomDesktopLive
+            room={room}
+            tickers={tickers}
+            comments={comments}
+            demoBanner={demoBanner}
+            demoMode={demoMode}
+          />
+        }
+      />
     </>
   );
 }
