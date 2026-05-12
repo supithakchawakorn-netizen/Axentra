@@ -15,6 +15,7 @@ export interface PublicVideoSummary {
   duration_seconds: number | null;
   thumbnail_url: string | null;
   mux_playback_id: string | null;
+  playback_url: string | null;
   published_at: string | null;
   creator: {
     id: string;
@@ -37,6 +38,7 @@ interface VideoRow {
   duration_seconds: number | null;
   thumbnail_url: string | null;
   mux_playback_id: string | null;
+  playback_url: string | null;
   published_at: string | null;
   creator_id: string;
   status: "pending" | "processing" | "ready" | "errored";
@@ -51,7 +53,7 @@ interface VideoRow {
 }
 
 const SELECT_PUBLIC = `
-  id, title, description, duration_seconds, thumbnail_url, mux_playback_id,
+  id, title, description, duration_seconds, thumbnail_url, mux_playback_id, playback_url,
   published_at, creator_id, status, visibility,
   profiles:creator_id ( id, handle, display_name, avatar_url, verified_broker )
 `;
@@ -64,6 +66,7 @@ function rowToSummary(row: VideoRow): PublicVideoSummary {
     duration_seconds: row.duration_seconds,
     thumbnail_url: row.thumbnail_url,
     mux_playback_id: row.mux_playback_id,
+    playback_url: row.playback_url,
     published_at: row.published_at,
     creator: row.profiles,
   };

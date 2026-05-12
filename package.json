@@ -1,5 +1,5 @@
 {
-  "name": "axentra",
+  "name": "varg-packs",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -13,10 +13,11 @@
     "test:watch": "vitest",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "db:types": "supabase gen types typescript --linked > types/db.ts",
+    "preflight": "node ./scripts/preflight.mjs",
+    "db:types": "node ./scripts/db-types.mjs",
     "db:migrate": "supabase db push",
-    "db:reset": "node -e \"console.log('db:reset is a stub. Local Supabase stack is not configured. Run pnpm db:migrate to push migrations to the remote project.')\"",
-    "check": "pnpm lint && pnpm typecheck && pnpm test && pnpm build"
+    "db:reset": "node ./scripts/db-reset.mjs",
+    "check": "corepack pnpm lint && corepack pnpm typecheck && corepack pnpm test && corepack pnpm build"
   },
   "engines": {
     "node": ">=20.0.0"

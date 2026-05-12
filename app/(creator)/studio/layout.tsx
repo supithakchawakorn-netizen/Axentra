@@ -7,6 +7,7 @@ import { APP_NAME } from "@/lib/utils/site";
 import { StudioRouteDock } from "@/components/layout/studio-route-dock";
 import { StudioModeBanner } from "@/components/layout/studio-mode-banner";
 import { MarketTape } from "@/components/market/market-tape";
+import { WolfpackLogoMark } from "@/components/layout/wolfpack-logo-mark";
 
 // Studio is per-user. Never prerender at build time.
 export const dynamic = "force-dynamic";
@@ -41,9 +42,7 @@ export default async function StudioLayout({
       <header className="glass-panel sticky top-0 z-30 border-b">
         <div className="mx-auto flex h-14 max-w-6xl items-center gap-6 px-4">
           <Link href="/" className="inline-flex items-center gap-2 font-semibold tracking-tight">
-            <span className="bg-primary text-primary-foreground inline-flex h-6 min-w-6 items-center justify-center rounded-md px-1 font-mono text-[10px] tracking-wider">
-              AX
-            </span>
+            <WolfpackLogoMark className="h-6 min-w-6" />
             {APP_NAME}
           </Link>
           <span className="text-muted-foreground text-xs uppercase tracking-widest">

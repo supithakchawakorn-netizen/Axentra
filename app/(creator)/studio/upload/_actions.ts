@@ -7,6 +7,7 @@ import { CreateUploadInputZ, type CreateUploadInput } from "@/types/video";
 import { siteUrl } from "@/lib/utils/site";
 import { captureServerEvent } from "@/lib/posthog/server";
 import { Events } from "@/lib/posthog/events";
+import { studioGuestModeEnabled } from "@/lib/env";
 
 export interface CreateUploadResult {
   ok: true;
@@ -39,6 +40,13 @@ export async function createVideoUpload(
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) {
+    if (studioGuestModeEnabled()) {
+      return {
+        ok: true,
+        videoId: `guest-video-${crypto.randomUUID()}`,
+        uploadUrl: "guest://skip-upload",
+      };
+    }
     return { ok: false, error: "Not signed in." };
   }
 

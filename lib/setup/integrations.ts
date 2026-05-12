@@ -22,7 +22,7 @@ export function getIntegrationChecklist(): IntegrationItem[] {
     {
       id: "supabase",
       name: "Supabase",
-      requiredFor: "Real auth, profiles, videos, live metadata, and tickers",
+      requiredFor: "Real auth, profiles, videos, and live metadata",
       docsUrl: "https://supabase.com/dashboard",
       install: "scoop install supabase",
       keys: [
@@ -74,29 +74,10 @@ export function getIntegrationChecklist(): IntegrationItem[] {
     {
       id: "openai",
       name: "OpenAI",
-      requiredFor: "Ticker and news AI summaries",
+      requiredFor: "Optional community digests and moderation assistants",
       docsUrl: "https://platform.openai.com/api-keys",
       keys: ["OPENAI_API_KEY"],
       configured: has(process.env.OPENAI_API_KEY),
-    },
-    {
-      id: "market_data",
-      name: "Market data provider",
-      requiredFor: "Realtime quote tape on viewer and creator surfaces",
-      docsUrl: "https://polygon.io/docs",
-      keys: [
-        "NEXT_PUBLIC_MARKET_DATA_MODE",
-        "MARKET_DATA_BASE_URL",
-        "MARKET_DATA_API_KEY",
-      ],
-      partial: has(process.env.NEXT_PUBLIC_MARKET_DATA_MODE),
-      notes:
-        "Use demo mode by default. Switch NEXT_PUBLIC_MARKET_DATA_MODE=provider only after MARKET_DATA_BASE_URL and MARKET_DATA_API_KEY are set.",
-      configured: has(
-        process.env.NEXT_PUBLIC_MARKET_DATA_MODE,
-        process.env.MARKET_DATA_BASE_URL,
-        process.env.MARKET_DATA_API_KEY,
-      ),
       optional: true,
     },
     {

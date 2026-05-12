@@ -3,15 +3,25 @@ import Image from "next/image";
 import type { PublicVideoSummary } from "@/lib/data/videos";
 import { formatDate, formatDuration } from "@/lib/utils/format";
 
-export function VideoCard({ video }: { video: PublicVideoSummary }) {
+export function VideoCard({
+  video,
+  prefetch = true,
+}: {
+  video: PublicVideoSummary;
+  prefetch?: boolean;
+}) {
   const thumb = video.thumbnail_url
     ? video.thumbnail_url
     : video.mux_playback_id
       ? `https://image.mux.com/${video.mux_playback_id}/thumbnail.jpg?width=640&height=360&fit_mode=smartcrop`
       : null;
   return (
-    <article className="group">
-      <Link href={`/v/${video.id}`} className="block space-y-2.5">
+    <article className="group snap-start">
+      <Link
+        href={`/v/${video.id}`}
+        prefetch={prefetch}
+        className="block space-y-2.5 touch-pan-y transition-transform duration-150 active:scale-[0.99]"
+      >
         <div className="bg-muted premium-lift premium-surface relative aspect-video overflow-hidden rounded-xl border">
           {thumb ? (
             <Image
@@ -19,7 +29,7 @@ export function VideoCard({ video }: { video: PublicVideoSummary }) {
               alt=""
               fill
               sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-              className="object-cover transition-transform duration-300 group-hover:scale-[1.04]"
+              className="object-cover transition-transform duration-300 group-hover:scale-[1.04] group-active:scale-[1.02]"
               unoptimized
             />
           ) : (
@@ -35,7 +45,7 @@ export function VideoCard({ video }: { video: PublicVideoSummary }) {
           <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent" />
         </div>
         <div className="soft-enter flex items-start gap-3">
-          <div className="bg-muted relative size-8 shrink-0 overflow-hidden rounded-full border">
+          <div className="bg-muted relative size-9 shrink-0 overflow-hidden rounded-full border">
             {video.creator?.avatar_url ? (
               <Image
                 src={video.creator.avatar_url}

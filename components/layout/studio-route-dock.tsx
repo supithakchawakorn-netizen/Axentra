@@ -8,9 +8,8 @@ const ROUTES = [
   { href: "/studio", label: "Overview" },
   { href: "/studio/analytics", label: "Analytics" },
   { href: "/studio/upload", label: "Upload" },
-  { href: "/studio/videos", label: "Videos" },
+  { href: "/studio/videos", label: "Manage Videos" },
   { href: "/studio/live", label: "Live" },
-  { href: "/studio/broker", label: "Broker" },
   { href: "/studio/settings", label: "Settings" },
 ] as const;
 

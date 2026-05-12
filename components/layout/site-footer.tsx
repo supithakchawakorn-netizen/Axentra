@@ -7,12 +7,11 @@ export function SiteFooter() {
       <div className="mx-auto grid w-full max-w-[1400px] gap-3 px-4 text-xs sm:grid-cols-[1fr_auto] sm:items-end">
         <div className="text-muted-foreground space-y-2">
           <p>
-            © {new Date().getFullYear()} {APP_NAME}. Market video and live
-            commentary. Not investment advice.
+            © {new Date().getFullYear()} {APP_NAME}. Community-first video and live
+            conversation.
           </p>
           <p>
-            Brokerage links are read-only. We don&apos;t execute trades, manage
-            money, or run a copy-trading product.
+            Build reputation through contribution, consistency, and trust.
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -24,6 +23,15 @@ export function SiteFooter() {
           </Link>
           <Link href="/live" className="glass-panel rounded-full border px-3 py-1">
             Live
+          </Link>
+          <Link href="/privacy" className="glass-panel rounded-full border px-3 py-1">
+            Privacy
+          </Link>
+          <Link href="/terms" className="glass-panel rounded-full border px-3 py-1">
+            Terms
+          </Link>
+          <Link href="/setup" className="glass-panel rounded-full border px-3 py-1">
+            Setup
           </Link>
         </div>
       </div>

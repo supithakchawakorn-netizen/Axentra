@@ -19,11 +19,11 @@ No password sign-in in V1.
 - `lib/supabase/client.ts` — browser client. Cookies via `@supabase/ssr`.
 - `lib/supabase/server.ts` — Server Component / Server Action client. Reads cookies; **respects RLS**.
 - `lib/supabase/admin.ts` — service-role client. **Only** import in `app/api/webhooks/*`, `app/api/cron/*`, and trusted server scripts.
-- `lib/supabase/middleware.ts` — refreshes session cookies in `middleware.ts`.
+- `lib/supabase/middleware.ts` — refreshes session cookies in `proxy.ts`.
 
-## Middleware
+## Proxy
 
-`middleware.ts`:
+`proxy.ts`:
 
 - Matches `/studio/:path*` and `/auth/callback`.
 - Refreshes the Supabase session cookie.

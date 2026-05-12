@@ -8,16 +8,23 @@
 
 import { z } from "zod";
 
+const optionalUrlFromEnv = z.preprocess(
+  (value) => (typeof value === "string" && value.trim() === "" ? undefined : value),
+  z.string().url().optional(),
+);
+
+const optionalStringFromEnv = z.preprocess(
+  (value) => (typeof value === "string" && value.trim() === "" ? undefined : value),
+  z.string().optional(),
+);
+
 const publicSchema = z.object({
   NEXT_PUBLIC_SITE_URL: z.string().url().default("http://localhost:3000"),
-  NEXT_PUBLIC_SUPABASE_URL: z.string().url().optional(),
-  NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().optional(),
-  NEXT_PUBLIC_POSTHOG_KEY: z.string().optional(),
+  NEXT_PUBLIC_SUPABASE_URL: optionalUrlFromEnv,
+  NEXT_PUBLIC_SUPABASE_ANON_KEY: optionalStringFromEnv,
+  NEXT_PUBLIC_POSTHOG_KEY: optionalStringFromEnv,
   NEXT_PUBLIC_POSTHOG_HOST: z.string().url().default("https://eu.i.posthog.com"),
-  NEXT_PUBLIC_SENTRY_DSN: z.string().optional(),
-  NEXT_PUBLIC_MARKET_DATA_MODE: z
-    .enum(["demo", "provider"])
-    .default("demo"),
+  NEXT_PUBLIC_SENTRY_DSN: optionalStringFromEnv,
 });
 
 const serverSchema = z.object({
@@ -26,8 +33,6 @@ const serverSchema = z.object({
   SENTRY_ORG: z.string().optional(),
   SENTRY_PROJECT: z.string().optional(),
   CRON_SECRET: z.string().optional(),
-  MARKET_DATA_BASE_URL: z.string().url().optional(),
-  MARKET_DATA_API_KEY: z.string().optional(),
 });
 
 export type PublicEnv = z.infer<typeof publicSchema>;
@@ -45,7 +50,6 @@ export function publicEnv(): PublicEnv {
     NEXT_PUBLIC_POSTHOG_KEY: process.env.NEXT_PUBLIC_POSTHOG_KEY,
     NEXT_PUBLIC_POSTHOG_HOST: process.env.NEXT_PUBLIC_POSTHOG_HOST,
     NEXT_PUBLIC_SENTRY_DSN: process.env.NEXT_PUBLIC_SENTRY_DSN,
-    NEXT_PUBLIC_MARKET_DATA_MODE: process.env.NEXT_PUBLIC_MARKET_DATA_MODE,
   });
   if (!parsed.success) {
     throw new Error(`Invalid public env: ${parsed.error.message}`);
@@ -62,8 +66,6 @@ export function serverEnv(): ServerEnv {
     SENTRY_ORG: process.env.SENTRY_ORG,
     SENTRY_PROJECT: process.env.SENTRY_PROJECT,
     CRON_SECRET: process.env.CRON_SECRET,
-    MARKET_DATA_BASE_URL: process.env.MARKET_DATA_BASE_URL,
-    MARKET_DATA_API_KEY: process.env.MARKET_DATA_API_KEY,
   });
   if (!parsed.success) {
     throw new Error(`Invalid server env: ${parsed.error.message}`);
@@ -89,7 +91,14 @@ export function studioGuestModeEnabled(): boolean {
   return process.env.NODE_ENV !== "production";
 }
 
-export function marketDataProviderConfigured(): boolean {
-  const env = serverEnv();
-  return Boolean(env.MARKET_DATA_BASE_URL && env.MARKET_DATA_API_KEY);
+/**
+ * Temporary kill-switch to pause creation/start of new live rooms while
+ * retaining visibility and end controls for existing rooms.
+ */
+export function liveBuildingPaused(): boolean {
+  const raw = process.env.NEXT_PUBLIC_LIVE_BUILD_PAUSED?.toLowerCase().trim();
+  if (raw === "1" || raw === "true") return true;
+  if (raw === "0" || raw === "false") return false;
+  return true;
 }
+

@@ -5,11 +5,11 @@ import type { Metadata } from "next";
 import { getProfileByHandle } from "@/lib/data/profiles";
 import { listVideosByCreator } from "@/lib/data/videos";
 import { listRoomsByCreator } from "@/lib/data/live-rooms";
-import { getPublicBrokerSnapshot } from "@/lib/data/broker-public";
 import { VideoCard } from "@/components/video/video-card";
 import { APP_NAME, siteUrl } from "@/lib/utils/site";
 import { formatDate } from "@/lib/utils/format";
 import { VerifiedBrokerBadge } from "@/components/creator/verified-broker-badge";
+import { ReputationPanel } from "@/components/creator/reputation-panel";
 
 export const revalidate = 60;
 
@@ -39,13 +39,12 @@ export default async function ProfilePage({ params, searchParams }: ProfilePageP
   const profile = await getProfileByHandle(handle);
   if (!profile) notFound();
 
-  const [videos, rooms, broker] = await Promise.all([
+  const [videos, rooms] = await Promise.all([
     listVideosByCreator({
       creatorId: profile.id,
       includeUnpublished: false,
     }),
     listRoomsByCreator({ creatorId: profile.id }),
-    getPublicBrokerSnapshot(profile.id),
   ]);
   const liveNow = rooms.filter((r) => r.status === "live");
   const scheduled = rooms.filter((r) => r.status === "scheduled");
@@ -53,6 +52,10 @@ export default async function ProfilePage({ params, searchParams }: ProfilePageP
     .filter((r) => r.status === "ended" && !r.recording_video_id)
     .slice(0, 8);
   const totalStreams = liveNow.length + scheduled.length + past.length;
+  const insightQuality = Math.min(100, 35 + videos.length * 5);
+  const consistency = Math.min(100, 25 + (videos.length + totalStreams) * 4);
+  const transparency = profile.bio ? 86 : 62;
+  const communityTrust = Math.min(100, 45 + videos.length * 2 + liveNow.length * 4);
 
   return (
     <main className="yt-page-shell mx-auto max-w-6xl px-2 py-8">
@@ -79,7 +82,7 @@ export default async function ProfilePage({ params, searchParams }: ProfilePageP
                 <h1 className="text-2xl font-semibold tracking-tight">
                   {profile.display_name ?? `@${profile.handle}`}
                 </h1>
-                {profile.verified_broker ? <VerifiedBrokerBadge /> : null}
+                <VerifiedBrokerBadge />
               </div>
               <p className="text-muted-foreground text-sm">@{profile.handle}</p>
               <p className="text-muted-foreground text-sm">
@@ -166,6 +169,14 @@ export default async function ProfilePage({ params, searchParams }: ProfilePageP
         </section>
       ) : null}
 
+      <ReputationPanel
+        creatorId={profile.id}
+        insightQuality={insightQuality}
+        consistency={consistency}
+        transparency={transparency}
+        communityTrust={communityTrust}
+      />
+
       <section className="mt-10 space-y-4">
         <div className="flex items-center gap-2 border-b pb-2">
           <Link
@@ -194,16 +205,16 @@ export default async function ProfilePage({ params, searchParams }: ProfilePageP
         ) : (
           <div className="space-y-5">
             <div>
-              <h2 className="text-sm font-semibold">Accounts</h2>
-              {broker.accounts.length === 0 ? (
-                <p className="text-muted-foreground mt-1 text-sm">No public account details.</p>
+              <h2 className="text-sm font-semibold">Contribution highlights</h2>
+              {videos.length === 0 ? (
+                <p className="text-muted-foreground mt-1 text-sm">No published contribution highlights yet.</p>
               ) : (
                 <ul className="mt-2 space-y-1 text-sm">
-                  {broker.accounts.map((a) => (
-                    <li key={a.id} className="flex items-center justify-between gap-3">
-                      <span>{a.account_name}</span>
-                      <span className="text-muted-foreground">
-                        {a.cached_balance != null ? `${a.cached_balance} ${a.currency ?? ""}` : "—"}
+                  {videos.slice(0, 5).map((v) => (
+                    <li key={v.id} className="flex items-center justify-between gap-3">
+                      <span className="truncate">{v.title}</span>
+                      <span className="text-muted-foreground text-xs">
+                        {v.published_at ? formatDate(v.published_at) : "Recently"}
                       </span>
                     </li>
                   ))}
@@ -211,30 +222,15 @@ export default async function ProfilePage({ params, searchParams }: ProfilePageP
               )}
             </div>
             <div>
-              <h2 className="text-sm font-semibold">Positions</h2>
-              {broker.positions.length === 0 ? (
-                <p className="text-muted-foreground mt-1 text-sm">No public positions.</p>
+              <h2 className="text-sm font-semibold">Live session history</h2>
+              {rooms.length === 0 ? (
+                <p className="text-muted-foreground mt-1 text-sm">No public live sessions yet.</p>
               ) : (
                 <ul className="mt-2 space-y-1 text-sm">
-                  {broker.positions.map((p) => (
-                    <li key={p.id} className="flex items-center justify-between gap-3">
-                      <span>{p.symbol}</span>
-                      <span className="text-muted-foreground">{p.quantity}</span>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-            <div>
-              <h2 className="text-sm font-semibold">Recent activity</h2>
-              {broker.activities.length === 0 ? (
-                <p className="text-muted-foreground mt-1 text-sm">No public recent activity.</p>
-              ) : (
-                <ul className="mt-2 space-y-1 text-sm">
-                  {broker.activities.slice(0, 10).map((a) => (
-                    <li key={a.id} className="flex items-center justify-between gap-3">
-                      <span>{a.type}{a.symbol ? ` · ${a.symbol}` : ""}</span>
-                      <span className="text-muted-foreground">{formatDate(a.occurred_at)}</span>
+                  {rooms.slice(0, 10).map((room) => (
+                    <li key={room.id} className="flex items-center justify-between gap-3">
+                      <span>{room.title}</span>
+                      <span className="text-muted-foreground text-xs">{room.status}</span>
                     </li>
                   ))}
                 </ul>

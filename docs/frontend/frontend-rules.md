@@ -95,6 +95,7 @@ There is **one** way to do each. Do not add a Route Handler that mirrors a Serve
 
 - Wrap PostHog in `lib/posthog/`. EU cloud. Use a thin `track(event, props)` helper.
 - Anonymous distinct IDs for viewers. No PII in event properties.
+- Keep implementation parity tracked in `docs/frontend/analytics-audit-matrix.md`.
 - Events for V1:
   - `home_view`, `explore_view`, `live_directory_view`, `ticker_view`, `video_view`, `live_view`
   - `video_play`, `video_25/50/75/100`, `live_join`

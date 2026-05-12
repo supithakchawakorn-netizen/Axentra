@@ -21,10 +21,18 @@ export type CreateUploadInput = z.infer<typeof CreateUploadInputZ>;
 
 export const EditVideoInputZ = z.object({
   videoId: z.string().uuid(),
-  title: z.string().trim().min(1).max(140),
-  description: z.string().trim().max(2000),
-  tickerIds: TickerIdsZ,
-});
+  title: z.string().trim().min(1).max(140).optional(),
+  description: z.string().trim().max(2000).optional(),
+  visibility: VideoVisibilityZ.optional(),
+  tickerIds: TickerIdsZ.optional(),
+}).refine(
+  (value) =>
+    value.title !== undefined ||
+    value.description !== undefined ||
+    value.visibility !== undefined ||
+    value.tickerIds !== undefined,
+  { message: "At least one field must be updated." },
+);
 export type EditVideoInput = z.infer<typeof EditVideoInputZ>;
 
 export const SetVisibilityInputZ = z.object({

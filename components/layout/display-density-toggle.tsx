@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Rows2, Rows3 } from "lucide-react";
 
-const KEY = "axentra-density";
+const KEY = "vargpacks-density";
 
 type Density = "default" | "compact";
 
