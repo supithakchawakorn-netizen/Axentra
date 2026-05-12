@@ -27,6 +27,83 @@ export function UploadForm() {
   const [tickers, setTickers] = useState<TickerRow[]>([]);
   const [file, setFile] = useState<File | null>(null);
 
+  async function ensureStudioGuestUser() {
+    const {
+      data: { user },
+      error,
+    } = await supabase.auth.getUser();
+    if (user && !error) return user;
+    if (!studioGuestModeEnabled()) return null;
+
+    const displayName = `Guest ${Math.random().toString(36).slice(2, 8)}`;
+    const { data, error: signInError } = await supabase.auth.signInAnonymously({
+      options: {
+        data: { full_name: displayName },
+      },
+    });
+    if (signInError) {
+      console.error("[upload-form] guest anonymous sign-in failed", signInError);
+      return null;
+    }
+    return data.user;
+  }
+
+  async function insertTopicTags(videoId: string) {
+    if (tickers.length === 0) return;
+    const rows = tickers.map((topic) => ({
+      video_id: videoId,
+      ticker_id: topic.id,
+    }));
+    const { error: tagError } = await supabase.from("video_tickers").insert(rows);
+    if (tagError) {
+      console.error("[upload-form] video_tickers insert error", tagError);
+    }
+  }
+
+  async function uploadViaSupabaseStorage(params: {
+    userId: string;
+    fileToUpload: File;
+  }): Promise<{ videoId: string }> {
+    const extension = params.fileToUpload.name.split(".").pop()?.toLowerCase() || "mp4";
+    const objectPath = `${params.userId}/${crypto.randomUUID()}.${extension}`;
+
+    const { error: storageError } = await supabase.storage
+      .from("videos")
+      .upload(objectPath, params.fileToUpload, {
+        cacheControl: "3600",
+        upsert: false,
+      });
+    if (storageError) {
+      throw new Error(storageError.message);
+    }
+
+    const { data: publicUrlData } = supabase.storage.from("videos").getPublicUrl(objectPath);
+    const publicUrl = publicUrlData.publicUrl;
+
+    const { data: inserted, error: insertError } = await supabase
+      .from("videos")
+      .insert({
+        creator_id: params.userId,
+        title,
+        description: description || "",
+        visibility,
+        status: "ready",
+        mux_upload_id: objectPath,
+        storage_path: objectPath,
+        playback_url: publicUrl,
+        thumbnail_url: null,
+      })
+      .select("id")
+      .single();
+
+    if (insertError || !inserted) {
+      throw new Error(insertError?.message || "Could not save video metadata.");
+    }
+
+    await insertTopicTags(inserted.id);
+    return { videoId: inserted.id };
+  }
+
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!file) {
@@ -36,23 +113,8 @@ export function UploadForm() {
 
     setStatus({ tag: "uploading", pct: 5 });
 
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser();
-    if (userError || !user) {
-      if (studioGuestModeEnabled()) {
-        console.log("[upload-form] guest mode upload simulation", {
-          title,
-          visibility,
-          topics: tickers.length,
-          fileName: file.name,
-        });
-        setStatus({ tag: "done", videoId: `guest-video-${crypto.randomUUID()}` });
-        router.push("/studio/videos");
-        return;
-      }
-      console.error("[upload-form] user lookup failed", userError);
+    const user = await ensureStudioGuestUser();
+    if (!user) {
       setStatus({ tag: "error", message: "You must sign in to upload." });
       return;
     }
@@ -67,10 +129,15 @@ export function UploadForm() {
         | { uploadId: string; url: string }
         | { error: string };
       if (!uploadUrlResponse.ok || !("uploadId" in uploadUrlPayload) || !("url" in uploadUrlPayload)) {
-        const message =
-          ("error" in uploadUrlPayload && uploadUrlPayload.error) ||
-          "Could not create Mux upload URL.";
-        setStatus({ tag: "error", message });
+        // Fallback for local launch testing when Mux keys are not configured.
+        const fallback = await uploadViaSupabaseStorage({
+          userId: user.id,
+          fileToUpload: file,
+        });
+        setStatus({ tag: "uploading", pct: 100 });
+        await new Promise((resolve) => setTimeout(resolve, 400));
+        setStatus({ tag: "done", videoId: fallback.videoId });
+        router.push("/studio/videos");
         return;
       }
 
@@ -106,16 +173,7 @@ export function UploadForm() {
         return;
       }
 
-      if (tickers.length > 0) {
-        const rows = tickers.map((topic) => ({
-          video_id: inserted.id,
-          ticker_id: topic.id,
-        }));
-        const { error: tagError } = await supabase.from("video_tickers").insert(rows);
-        if (tagError) {
-          console.error("[upload-form] video_tickers insert error", tagError);
-        }
-      }
+      await insertTopicTags(inserted.id);
 
       setStatus({ tag: "uploading", pct: 100 });
       await new Promise((resolve) => setTimeout(resolve, 400));

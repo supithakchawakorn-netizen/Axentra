@@ -44,6 +44,14 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  images: {
+    remotePatterns: [
+      { protocol: "https", hostname: "image.mux.com" },
+      { protocol: "https", hostname: "stream.mux.com" },
+      { protocol: "https", hostname: "*.supabase.co" },
+      { protocol: "https", hostname: "livekit.io" },
+    ],
+  },
 };
 
 export default nextConfig;

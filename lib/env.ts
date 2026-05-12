@@ -8,13 +8,23 @@
 
 import { z } from "zod";
 
+const optionalUrlFromEnv = z.preprocess(
+  (value) => (typeof value === "string" && value.trim() === "" ? undefined : value),
+  z.string().url().optional(),
+);
+
+const optionalStringFromEnv = z.preprocess(
+  (value) => (typeof value === "string" && value.trim() === "" ? undefined : value),
+  z.string().optional(),
+);
+
 const publicSchema = z.object({
   NEXT_PUBLIC_SITE_URL: z.string().url().default("http://localhost:3000"),
-  NEXT_PUBLIC_SUPABASE_URL: z.string().url().optional(),
-  NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().optional(),
-  NEXT_PUBLIC_POSTHOG_KEY: z.string().optional(),
+  NEXT_PUBLIC_SUPABASE_URL: optionalUrlFromEnv,
+  NEXT_PUBLIC_SUPABASE_ANON_KEY: optionalStringFromEnv,
+  NEXT_PUBLIC_POSTHOG_KEY: optionalStringFromEnv,
   NEXT_PUBLIC_POSTHOG_HOST: z.string().url().default("https://eu.i.posthog.com"),
-  NEXT_PUBLIC_SENTRY_DSN: z.string().optional(),
+  NEXT_PUBLIC_SENTRY_DSN: optionalStringFromEnv,
 });
 
 const serverSchema = z.object({
