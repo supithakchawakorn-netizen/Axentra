@@ -1,7 +1,8 @@
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { SignInForm } from "@/components/auth/sign-in-form";
 import { createClient } from "@/lib/supabase/server";
-import { supabaseConfigured } from "@/lib/env";
+import { studioGuestModeEnabled, supabaseConfigured } from "@/lib/env";
 import { APP_NAME } from "@/lib/utils/site";
 
 export const dynamic = "force-dynamic";
@@ -18,6 +19,7 @@ interface SignInPageProps {
 export default async function SignInPage({ searchParams }: SignInPageProps) {
   const params = await searchParams;
   const next = typeof params.next === "string" ? params.next : "/studio";
+  const guestMode = studioGuestModeEnabled();
 
   if (supabaseConfigured()) {
     const supabase = await createClient();
@@ -49,7 +51,17 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
           to enable sign-in.
         </div>
       ) : (
-        <SignInForm next={next} initialError={params.error ?? null} />
+        <div className="space-y-4">
+          <SignInForm next={next} initialError={params.error ?? null} />
+          {guestMode ? (
+            <Link
+              href={next}
+              className="inline-flex w-full items-center justify-center rounded-md border px-4 py-2 text-sm hover:bg-muted/40"
+            >
+              Continue in guest mode
+            </Link>
+          ) : null}
+        </div>
       )}
     </div>
   );

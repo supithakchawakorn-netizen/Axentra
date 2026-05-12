@@ -23,14 +23,14 @@ export function SiteHeaderDesktop() {
         className="mx-auto hidden w-full max-w-xl items-center md:flex"
       >
         <label htmlFor="global-search" className="sr-only">
-          Search videos and tickers
+          Search communities and videos
         </label>
         <div className="bg-muted/85 border-input premium-surface flex h-10 w-full items-center rounded-l-full border px-3">
           <Search className="text-muted-foreground mr-2 size-4" />
           <input
             id="global-search"
             name="q"
-            placeholder="Search videos or ticker symbols"
+            placeholder="Search communities or creators"
             className="placeholder:text-muted-foreground w-full bg-transparent text-sm outline-none"
           />
         </div>

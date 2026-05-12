@@ -4,7 +4,7 @@ import { z } from "zod";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { siteUrl } from "@/lib/utils/site";
+import { deriveRequestOrigin } from "@/lib/utils/request-origin";
 
 const EmailZ = z.object({
   email: z.string().email(),
@@ -22,23 +22,12 @@ function normalizeNext(next: string): string {
 
 async function requestOrigin(): Promise<string> {
   const headerStore = await headers();
-  const origin = headerStore.get("origin");
-  if (origin) {
-    try {
-      return new URL(origin).origin;
-    } catch {
-      // Ignore malformed origin and continue with host/proto inference.
-    }
-  }
-
-  const host = headerStore.get("x-forwarded-host") ?? headerStore.get("host");
-  if (host) {
-    const proto =
-      headerStore.get("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https");
-    return `${proto}://${host}`;
-  }
-
-  return siteUrl();
+  return deriveRequestOrigin({
+    originHeader: headerStore.get("origin"),
+    forwardedProtoHeader: headerStore.get("x-forwarded-proto"),
+    forwardedHostHeader: headerStore.get("x-forwarded-host"),
+    hostHeader: headerStore.get("host"),
+  });
 }
 
 function callbackUrl(next: string, base: string): string {

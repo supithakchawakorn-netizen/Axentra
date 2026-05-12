@@ -6,6 +6,8 @@ import { TickerChips } from "@/components/ticker/ticker-chips";
 import { VerifiedBrokerBadge } from "@/components/creator/verified-broker-badge";
 import { StatusPill } from "@/components/shared/status-pill";
 import { CommentsSection } from "@/components/shared/comments-section";
+import { ContentHelpfulnessVote } from "@/components/shared/content-helpfulness-vote";
+import { inferMarketCategoryFromSymbols } from "@/lib/utils/market-category";
 
 interface RoomDesktopLiveProps {
   room: PublicLiveRoom;
@@ -22,6 +24,7 @@ export function RoomDesktopLive({
   demoBanner,
   demoMode,
 }: RoomDesktopLiveProps) {
+  const marketCategory = inferMarketCategoryFromSymbols(tickers.map((ticker) => ticker.symbol));
   return (
     <main className="mx-auto max-w-5xl px-4 py-8">
       {demoBanner ? (
@@ -59,6 +62,14 @@ export function RoomDesktopLive({
           </p>
         ) : null}
       </header>
+
+      <div className="mt-6">
+        <ContentHelpfulnessVote
+          contentId={room.id}
+          contentType="live"
+          marketCategory={marketCategory}
+        />
+      </div>
 
       <div className="mt-6">
         <CommentsSection

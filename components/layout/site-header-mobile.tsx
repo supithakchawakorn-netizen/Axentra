@@ -12,7 +12,7 @@ export function SiteHeaderMobile() {
       </Link>
       <form action="/explore" method="get" className="flex w-full items-center">
         <label htmlFor="mobile-search" className="sr-only">
-          Search videos and tickers
+          Search communities and videos
         </label>
         <div className="bg-muted/85 border-input premium-surface flex h-9 w-full items-center rounded-full border px-3">
           <Search className="text-muted-foreground mr-2 size-4" />

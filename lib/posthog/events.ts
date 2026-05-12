@@ -26,20 +26,21 @@ export const Events = {
   LiveRoomEnd: "live_room_end",
 
   // M3
-  TickerView: "ticker_view",
   HomeView: "home_view",
   ExploreView: "explore_view",
-
-  // M4
-  BrokerConnect: "broker_connect",
-  BrokerVisibilityChange: "broker_visibility_change",
-  BrokerDisconnect: "broker_disconnect",
-  WaitlistSubmit: "waitlist_submit",
 
   // Growth experiments
   ExperimentImpression: "experiment_impression",
   ExperimentClick: "experiment_click",
   ExperimentQualitySignal: "experiment_quality_signal",
+
+  // Reputation + trust (V1 trust UX)
+  ReputationPanelView: "reputation_panel_view",
+  ReputationComponentView: "reputation_component_view",
+  ContentHelpfulVote: "content_helpful_vote",
+  ContentNotHelpfulVote: "content_not_helpful_vote",
+  CreatorConsistencyMilestone: "creator_consistency_milestone",
+  TrustedCreatorReturnView: "trusted_creator_return_view",
 } as const;
 
 export type EventName = (typeof Events)[keyof typeof Events];

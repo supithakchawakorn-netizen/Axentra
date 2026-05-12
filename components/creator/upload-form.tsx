@@ -5,7 +5,8 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { createVideoUpload } from "@/app/(creator)/studio/upload/_actions";
+import { createClient } from "@/lib/supabase/client";
+import { studioGuestModeEnabled } from "@/lib/env";
 import { TickerPicker } from "@/components/creator/ticker-picker";
 import type { TickerRow } from "@/lib/data/tickers";
 
@@ -18,6 +19,7 @@ type Status =
 
 export function UploadForm() {
   const router = useRouter();
+  const supabase = createClient();
   const [status, setStatus] = useState<Status>({ tag: "idle" });
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -32,39 +34,103 @@ export function UploadForm() {
       return;
     }
 
-    setStatus({ tag: "creating" });
-    const result = await createVideoUpload({
-      title,
-      description,
-      visibility,
-      tickerIds: tickers.map((t) => t.id),
-    });
-    if (!result.ok) {
-      setStatus({ tag: "error", message: result.error });
+    setStatus({ tag: "uploading", pct: 5 });
+
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
+    if (userError || !user) {
+      if (studioGuestModeEnabled()) {
+        console.log("[upload-form] guest mode upload simulation", {
+          title,
+          visibility,
+          topics: tickers.length,
+          fileName: file.name,
+        });
+        setStatus({ tag: "done", videoId: `guest-video-${crypto.randomUUID()}` });
+        router.push("/studio/videos");
+        return;
+      }
+      console.error("[upload-form] user lookup failed", userError);
+      setStatus({ tag: "error", message: "You must sign in to upload." });
       return;
     }
 
     try {
-      await uploadToMux(result.uploadUrl, file, (pct) =>
-        setStatus({ tag: "uploading", pct }),
-      );
-      setStatus({ tag: "done", videoId: result.videoId });
+      const extension = file.name.split(".").pop()?.toLowerCase() || "mp4";
+      const objectPath = `${user.id}/${crypto.randomUUID()}.${extension}`;
+
+      const { error: storageError } = await supabase
+        .storage
+        .from("videos")
+        .upload(objectPath, file, {
+          cacheControl: "3600",
+          upsert: false,
+        });
+      if (storageError) {
+        console.error("[upload-form] storage upload error", storageError);
+        setStatus({ tag: "error", message: storageError.message });
+        return;
+      }
+
+      const { data: publicUrlData } = supabase.storage.from("videos").getPublicUrl(objectPath);
+      const publicUrl = publicUrlData.publicUrl;
+      setStatus({ tag: "uploading", pct: 75 });
+
+      // Env audit breadcrumb for local debugging.
+      console.log("[upload-form] Supabase env check", {
+        hasSupabaseClient: Boolean(supabase),
+      });
+
+      const { data: inserted, error: insertError } = await supabase
+        .from("videos")
+        .insert({
+          creator_id: user.id,
+          title,
+          description: description || `Uploaded file: ${publicUrl}`,
+          visibility,
+          status: "ready",
+          mux_upload_id: objectPath,
+          thumbnail_url: null,
+        })
+        .select("id")
+        .single();
+      if (insertError || !inserted) {
+        console.error("[upload-form] videos insert error", insertError);
+        setStatus({ tag: "error", message: insertError?.message || "Could not save video metadata." });
+        return;
+      }
+
+      if (tickers.length > 0) {
+        const rows = tickers.map((topic) => ({
+          video_id: inserted.id,
+          ticker_id: topic.id,
+        }));
+        const { error: tagError } = await supabase.from("video_tickers").insert(rows);
+        if (tagError) {
+          console.error("[upload-form] video_tickers insert error", tagError);
+        }
+      }
+
+      setStatus({ tag: "done", videoId: inserted.id });
       router.push("/studio/videos");
     } catch (err) {
       const message = err instanceof Error ? err.message : "Upload failed.";
+      console.error("[upload-form] unexpected upload error", err);
       setStatus({ tag: "error", message });
     }
   }
 
-  const busy = status.tag === "creating" || status.tag === "uploading";
+  const busy = status.tag === "uploading";
 
   return (
     <form onSubmit={onSubmit} className="space-y-6">
       <section className="glass-panel rounded-lg border p-4 space-y-1.5">
         <p className="text-sm font-medium">Time-to-publish guide</p>
         <ul className="text-muted-foreground space-y-1 text-xs">
-          <li>1) Keep title clear and ticker-first for feed discovery.</li>
-          <li>2) Add 1-3 tickers so your video appears on ticker pages.</li>
+          <li>1) Keep title clear and audience-focused for discovery.</li>
+          <li>2) Add 1-3 topics so your video appears in the right communities.</li>
           <li>3) Leave this tab open until upload reaches 100%.</li>
         </ul>
       </section>
@@ -96,7 +162,7 @@ export function UploadForm() {
       </div>
 
       <div className="space-y-3 rounded-lg border p-4">
-        <p className="text-sm font-medium">Related tickers</p>
+        <p className="text-sm font-medium">Related topics</p>
         <TickerPicker value={tickers} onChange={setTickers} disabled={busy} />
       </div>
 
@@ -150,7 +216,7 @@ export function UploadForm() {
           {busy
             ? status.tag === "uploading"
               ? `Uploading… ${Math.round(status.pct)}%`
-              : "Preparing…"
+              : "Preparing..."
             : "Upload"}
         </Button>
         <p className="text-muted-foreground text-xs">
@@ -159,34 +225,4 @@ export function UploadForm() {
       </div>
     </form>
   );
-}
-
-function uploadToMux(
-  url: string,
-  file: File,
-  onProgress: (pct: number) => void,
-): Promise<void> {
-  return new Promise((resolve, reject) => {
-    const xhr = new XMLHttpRequest();
-    xhr.open("PUT", url);
-    xhr.upload.addEventListener("progress", (e) => {
-      if (e.lengthComputable) {
-        onProgress((e.loaded / e.total) * 100);
-      }
-    });
-    xhr.addEventListener("load", () => {
-      if (xhr.status >= 200 && xhr.status < 300) {
-        resolve();
-      } else {
-        reject(new Error(`Mux upload failed with status ${xhr.status}.`));
-      }
-    });
-    xhr.addEventListener("error", () =>
-      reject(new Error("Network error during upload.")),
-    );
-    xhr.addEventListener("abort", () =>
-      reject(new Error("Upload aborted.")),
-    );
-    xhr.send(file);
-  });
 }

@@ -10,7 +10,6 @@ const ROUTES = [
   { href: "/studio/upload", label: "Upload" },
   { href: "/studio/videos", label: "Videos" },
   { href: "/studio/live", label: "Live" },
-  { href: "/studio/broker", label: "Broker" },
   { href: "/studio/settings", label: "Settings" },
 ] as const;
 

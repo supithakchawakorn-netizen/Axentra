@@ -13,6 +13,7 @@ import {
 import { mintCoHostToken, mintCreatorToken } from "@/lib/livekit";
 import { captureServerEvent } from "@/lib/posthog/server";
 import { Events } from "@/lib/posthog/events";
+import { studioGuestModeEnabled } from "@/lib/env";
 
 export interface CreateRoomResult {
   ok: true;
@@ -39,7 +40,18 @@ export async function createLiveRoom(
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { ok: false, error: "Not signed in." };
+  if (!user) {
+    if (studioGuestModeEnabled()) {
+      return {
+        ok: true,
+        roomId: "demo-room-1",
+        livekitToken: "guest-preview-token",
+        livekitUrl: process.env.LIVEKIT_URL ?? "wss://guest-preview.invalid",
+        livekitRoomName: "guest-preview-room",
+      };
+    }
+    return { ok: false, error: "Not signed in." };
+  }
 
   const { data: profileRow } = await supabase
     .from("profiles")
@@ -117,6 +129,9 @@ export async function createLiveRoom(
 export async function endLiveRoom(
   input: EndLiveRoomInput,
 ): Promise<{ ok: boolean; error?: string }> {
+  if (studioGuestModeEnabled()) {
+    return { ok: true };
+  }
   const parsed = EndLiveRoomInputZ.safeParse(input);
   if (!parsed.success) {
     return { ok: false, error: parsed.error.issues[0]?.message ?? "Invalid input." };
@@ -125,7 +140,10 @@ export async function endLiveRoom(
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { ok: false, error: "Not signed in." };
+  if (!user) {
+    if (studioGuestModeEnabled()) return { ok: true };
+    return { ok: false, error: "Not signed in." };
+  }
 
   const { error } = await supabase
     .from("live_rooms")
@@ -161,7 +179,18 @@ export async function getCreatorPublishToken(
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { ok: false, error: "Not signed in." };
+  if (!user) {
+    if (studioGuestModeEnabled()) {
+      return {
+        ok: true,
+        livekitToken: "guest-preview-token",
+        livekitUrl: process.env.LIVEKIT_URL ?? "wss://guest-preview.invalid",
+        livekitRoomName: "guest-preview-room",
+        status: "live",
+      };
+    }
+    return { ok: false, error: "Not signed in." };
+  }
 
   const { data: roomRow, error } = await supabase
     .from("live_rooms")
@@ -220,7 +249,16 @@ export async function inviteCoHost(
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { ok: false, error: "Not signed in." };
+  if (!user) {
+    if (studioGuestModeEnabled()) {
+      return {
+        ok: true,
+        livekitToken: "guest-cohost-token",
+        livekitUrl: process.env.LIVEKIT_URL ?? "wss://guest-preview.invalid",
+      };
+    }
+    return { ok: false, error: "Not signed in." };
+  }
 
   const { data: roomRow, error } = await supabase
     .from("live_rooms")

@@ -21,18 +21,42 @@ export interface FeedRanker {
 export class HeuristicFeedRanker implements FeedRanker {
   rankVideos(videos: PublicVideoSummary[], context: FeedRankingContext = {}) {
     const query = context.query?.trim().toLowerCase() ?? "";
-    return [...videos].sort((a, b) => scoreVideo(b, query) - scoreVideo(a, query));
+    const trustMode = process.env.FEED_TRUST_RANKING_ENABLED === "1";
+    const ranked = [...videos].sort(
+      (a, b) => scoreVideo(b, query, trustMode) - scoreVideo(a, query, trustMode),
+    );
+    if (trustMode && ranked.length > 0) {
+      const top = ranked.slice(0, 3).map((video) => ({
+        id: video.id,
+        creator: video.creator?.handle ?? "unknown",
+        verified: Boolean(video.creator?.verified_broker),
+      }));
+      console.info("[feed-ranker] trust-weighted video ranking", top);
+    }
+    return ranked;
   }
 
   rankLiveRooms(rooms: PublicLiveRoom[], context: FeedRankingContext = {}) {
     const query = context.query?.trim().toLowerCase() ?? "";
-    return [...rooms].sort((a, b) => scoreRoom(b, query) - scoreRoom(a, query));
+    const trustMode = process.env.FEED_TRUST_RANKING_ENABLED === "1";
+    const ranked = [...rooms].sort(
+      (a, b) => scoreRoom(b, query, trustMode) - scoreRoom(a, query, trustMode),
+    );
+    if (trustMode && ranked.length > 0) {
+      const top = ranked.slice(0, 3).map((room) => ({
+        id: room.id,
+        creator: room.creator?.handle ?? "unknown",
+        viewers: room.viewer_count,
+      }));
+      console.info("[feed-ranker] trust-weighted live ranking", top);
+    }
+    return ranked;
   }
 }
 
 export const defaultFeedRanker: FeedRanker = new HeuristicFeedRanker();
 
-function scoreVideo(video: PublicVideoSummary, query: string) {
+function scoreVideo(video: PublicVideoSummary, query: string, trustMode: boolean) {
   const hours = video.published_at
     ? Math.max(0, (Date.now() - new Date(video.published_at).getTime()) / 3_600_000)
     : 72;
@@ -45,10 +69,16 @@ function scoreVideo(video: PublicVideoSummary, query: string) {
       ? 24
       : 0
     : 0;
-  return recencyScore + verifiedScore + queryScore;
+  if (!trustMode) {
+    return recencyScore + verifiedScore + queryScore;
+  }
+
+  const trustSignal = video.creator?.verified_broker ? 85 : 55;
+  const popularityProxy = Math.min(40, Math.max(0, 40 - hours * 0.6));
+  return trustSignal * 0.6 + recencyScore * 0.2 + queryScore * 0.15 + popularityProxy * 0.05;
 }
 
-function scoreRoom(room: PublicLiveRoom, query: string) {
+function scoreRoom(room: PublicLiveRoom, query: string, trustMode: boolean) {
   const viewerScore = Math.min(90, room.viewer_count * 0.7);
   const startedAt = room.started_at ? new Date(room.started_at).getTime() : Date.now();
   const liveRecencyHours = Math.max(0, (Date.now() - startedAt) / 3_600_000);
@@ -60,5 +90,10 @@ function scoreRoom(room: PublicLiveRoom, query: string) {
       ? 20
       : 0
     : 0;
-  return viewerScore + freshnessScore + queryScore;
+  if (!trustMode) {
+    return viewerScore + freshnessScore + queryScore;
+  }
+
+  const trustSignal = room.creator?.verified_broker ? 85 : 55;
+  return trustSignal * 0.6 + freshnessScore * 0.2 + queryScore * 0.15 + viewerScore * 0.05;
 }

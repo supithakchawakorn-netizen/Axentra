@@ -1,7 +1,6 @@
 import Link from "next/link";
 import type { PublicLiveRoom } from "@/lib/data/live-rooms";
 import type { PublicVideoSummary } from "@/lib/data/videos";
-import type { TickerRow } from "@/lib/data/tickers";
 import { PageHeader } from "@/components/shared/page-header";
 import { SectionHeader } from "@/components/shared/section-header";
 import { LiveRoomCard } from "@/components/live/live-room-card";
@@ -13,21 +12,15 @@ import { WolfpackHeroStrip } from "@/components/shared/wolfpack-hero-strip";
 interface ExploreMobileProps {
   query: string;
   normalizedQuery: string;
-  tickerSymbol?: string;
-  tickerRow: TickerRow | null;
   rankedLive: PublicLiveRoom[];
   rankedVideos: PublicVideoSummary[];
-  topTickers: TickerRow[];
 }
 
 export function ExploreMobile({
   query,
   normalizedQuery,
-  tickerSymbol,
-  tickerRow,
   rankedLive,
   rankedVideos,
-  topTickers,
 }: ExploreMobileProps) {
   const nextDive = rankedVideos[0] ?? null;
   const feedPrimary = rankedVideos.slice(0, 12);
@@ -40,10 +33,10 @@ export function ExploreMobile({
         description={
           normalizedQuery
             ? `Showing results for "${query}".`
-            : "Swipe wolfpack uploads and live market streams."
+            : "Swipe community uploads and live sessions."
         }
       />
-      <WolfpackHeroStrip caption="Sharper feeds. Faster market context." />
+      <WolfpackHeroStrip caption="Sharper feeds. Stronger community context." />
       {nextDive ? (
         <section className="glass-panel rounded-xl border p-4">
           <p className="text-xs uppercase tracking-wider text-muted-foreground">
@@ -82,9 +75,9 @@ export function ExploreMobile({
 
       <section className="space-y-3">
         <SectionHeader
-          title={tickerRow ? `Videos tagged $${tickerRow.symbol}` : "Recent videos"}
+          title="Recent videos"
         />
-        {tickerRow || normalizedQuery ? (
+        {normalizedQuery ? (
           <p className="text-muted-foreground text-sm">
             <Link href="/explore" prefetch={false} className="hover:text-foreground transition-colors">
               ← Clear filters
@@ -93,9 +86,7 @@ export function ExploreMobile({
         ) : null}
         {rankedVideos.length === 0 ? (
           <p className="text-muted-foreground text-sm">
-            {tickerRow
-              ? `No videos tagged ${tickerRow.symbol} yet.`
-              : "No videos yet. Check back soon."}
+            No videos yet. Check back soon.
           </p>
         ) : (
           <div className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2">
@@ -125,27 +116,20 @@ export function ExploreMobile({
       ) : null}
 
       <section className="glass-panel rounded-xl border p-4 space-y-3">
-        <SectionHeader title="By ticker" subtitle="Tap one symbol to filter." />
-        {topTickers.length === 0 ? (
-          <p className="text-muted-foreground text-sm">No tickers seeded yet.</p>
-        ) : (
-          <ul className="flex flex-wrap gap-1.5">
-            {topTickers.map((ticker) => (
-              <li key={ticker.id}>
-                <Link
-                  href={`/explore?ticker=${ticker.symbol}`}
-                  prefetch={false}
-                  className={`bg-secondary text-secondary-foreground hover:bg-accent inline-flex items-center rounded-md px-2.5 py-1 font-mono text-xs ${
-                    tickerSymbol === ticker.symbol ? "ring-2 ring-foreground/30" : ""
-                  }`}
-                  title={ticker.name}
-                >
-                  ${ticker.symbol}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        )}
+        <SectionHeader title="Community filters" subtitle="Tap a topic to filter." />
+        <ul className="flex flex-wrap gap-1.5">
+          {["builders", "creators", "community", "learning", "live"].map((topic) => (
+            <li key={topic}>
+              <Link
+                href={`/explore?q=${topic}`}
+                prefetch={false}
+                className="bg-secondary text-secondary-foreground hover:bg-accent inline-flex items-center rounded-md px-2.5 py-1 text-xs"
+              >
+                {topic}
+              </Link>
+            </li>
+          ))}
+        </ul>
       </section>
     </main>
   );

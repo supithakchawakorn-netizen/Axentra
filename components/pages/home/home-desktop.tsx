@@ -1,23 +1,29 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
-import type { PublicLiveRoom } from "@/lib/data/live-rooms";
 import type { PublicVideoSummary } from "@/lib/data/videos";
-import type { TickerRow } from "@/lib/data/tickers";
 import { PageHeader } from "@/components/shared/page-header";
 import { SectionHeader } from "@/components/shared/section-header";
-import { EmptyState } from "@/components/shared/empty-state";
-import { LiveRoomCard } from "@/components/live/live-room-card";
-import { LiveHighlightsStrip } from "@/components/live/live-highlights-strip";
+import { MarketTape } from "@/components/market/market-tape";
 import { VideoCard } from "@/components/video/video-card";
 import { HomeGrowthLazy } from "@/components/experiments/home-growth-lazy";
 import { WolfpackHeroStrip } from "@/components/shared/wolfpack-hero-strip";
+import {
+  HOME_MARKET_CATEGORIES,
+  filterVideosByCategory,
+  getHomeMarketCategory,
+  type MarketCategory,
+} from "@/components/pages/home/market-categories";
 
 interface HomeDesktopProps {
   videos: PublicVideoSummary[];
-  live: PublicLiveRoom[];
-  topTickers: TickerRow[];
+  initialCategory: MarketCategory;
 }
-
-export function HomeDesktop({ videos, live, topTickers }: HomeDesktopProps) {
+export function HomeDesktop({ videos, initialCategory }: HomeDesktopProps) {
+  const [selectedCategory, setSelectedCategory] = useState<MarketCategory>(initialCategory);
+  const activeCategory = getHomeMarketCategory(selectedCategory);
+  const filteredVideos = filterVideosByCategory(videos, activeCategory.key);
   return (
     <main className="yt-page-shell w-full space-y-8 px-1 py-6 sm:px-2">
       <PageHeader
@@ -26,53 +32,38 @@ export function HomeDesktop({ videos, live, topTickers }: HomeDesktopProps) {
       />
       <WolfpackHeroStrip caption="Verified creator commentary, no noise." />
       <HomeGrowthLazy />
-      <LiveHighlightsStrip rooms={live} />
 
-      {topTickers.length > 0 ? (
-        <section className="space-y-3">
-          <SectionHeader title="Trending tickers" subtitle="Jump to filtered feeds." />
-          <ul className="flex flex-wrap gap-1.5">
-            {topTickers.map((ticker) => (
-              <li key={ticker.id}>
-                <Link
-                  href={`/t/${ticker.symbol}`}
-                  className="bg-secondary text-secondary-foreground hover:bg-accent inline-flex items-center rounded-full px-3 py-1.5 font-mono text-xs"
-                  title={ticker.name}
+      <section className="space-y-4">
+        <ul className="flex flex-wrap items-center gap-2">
+          {HOME_MARKET_CATEGORIES.map((category) => {
+            const isActive = category.key === activeCategory.key;
+            return (
+              <li key={category.key}>
+                <button
+                  type="button"
+                  onClick={() => setSelectedCategory(category.key)}
+                  className={`inline-flex rounded-full border px-4 py-1.5 text-sm transition-colors ${
+                    isActive
+                      ? "bg-primary text-primary-foreground border-primary"
+                      : "bg-secondary text-secondary-foreground hover:bg-accent"
+                  }`}
                 >
-                  ${ticker.symbol}
-                </Link>
+                  {category.label}
+                </button>
               </li>
-            ))}
-          </ul>
+            );
+          })}
+        </ul>
+        <section className="space-y-2">
+          <SectionHeader title={activeCategory.description} />
+          <MarketTape symbols={activeCategory.symbols} />
         </section>
-      ) : null}
-
-      {live.length > 0 ? (
-        <section className="space-y-4">
-          <SectionHeader
-            title={`Live now (${live.length})`}
-            action={
-              <Link
-                href="/live"
-                className="text-muted-foreground hover:text-foreground text-sm transition-colors"
-              >
-                See all
-              </Link>
-            }
-          />
-          <ul className="yt-feed-grid grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {live.slice(0, 3).map((room) => (
-              <li key={room.id}>
-                <LiveRoomCard room={room} />
-              </li>
-            ))}
-          </ul>
-        </section>
-      ) : null}
+      </section>
 
       <section className="space-y-4">
         <SectionHeader
-          title="Recent videos"
+          title={`${activeCategory.label} creator videos`}
+          subtitle="Uploads related to the selected category."
           action={
             <Link
               href="/explore"
@@ -82,26 +73,31 @@ export function HomeDesktop({ videos, live, topTickers }: HomeDesktopProps) {
             </Link>
           }
         />
-        {videos.length === 0 ? (
-          <EmptyState
-            title="No videos yet."
-            description="Once creators publish their first videos, they'll show up here."
-            action={
-              <Link
-                href="/sign-in?next=/studio"
-                className="text-primary inline-block text-sm hover:underline underline-offset-4"
-              >
-                Become a creator →
-              </Link>
-            }
-          />
+        {filteredVideos.length === 0 ? (
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            {activeCategory.examples.map((upload) => (
+              <article key={upload.title} className="rounded-xl border bg-card/60 p-4">
+                <p className="text-muted-foreground mb-2 text-xs uppercase tracking-wide">Example</p>
+                <p className="font-medium">{upload.title}</p>
+                <p className="text-muted-foreground mt-2 text-sm">{upload.category}</p>
+              </article>
+            ))}
+          </div>
         ) : (
-          <div className="yt-feed-grid grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {videos.map((video) => (
+          <div className="yt-feed-grid grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            {filteredVideos.map((video) => (
               <VideoCard key={video.id} video={video} />
             ))}
           </div>
         )}
+        {filteredVideos.length === 0 ? (
+          <Link
+            href="/sign-in?next=/studio"
+            className="text-primary inline-block text-sm hover:underline underline-offset-4"
+          >
+            Become a creator →
+          </Link>
+        ) : null}
       </section>
     </main>
   );

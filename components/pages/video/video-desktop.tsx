@@ -9,6 +9,8 @@ import { Share2, ThumbsUp } from "lucide-react";
 import { CommentsSection } from "@/components/shared/comments-section";
 import type { DemoComment } from "@/lib/data/comments";
 import { ContinueWatchingStrip } from "@/components/video/continue-watching-strip";
+import { ContentHelpfulnessVote } from "@/components/shared/content-helpfulness-vote";
+import { inferMarketCategoryFromSymbols } from "@/lib/utils/market-category";
 
 interface VideoDesktopProps {
   video: PublicVideoDetail;
@@ -28,6 +30,7 @@ export function VideoDesktop({
   startAtSeconds,
 }: VideoDesktopProps) {
   const nextVideo = recommended[0] ?? null;
+  const marketCategory = inferMarketCategoryFromSymbols(tickers.map((ticker) => ticker.symbol));
 
   return (
     <main className="w-full px-1 py-6 sm:px-2">
@@ -99,6 +102,12 @@ export function VideoDesktop({
               </p>
             </section>
           ) : null}
+
+          <ContentHelpfulnessVote
+            contentId={video.id}
+            contentType="video"
+            marketCategory={marketCategory}
+          />
 
           {nextVideo ? (
             <section className="glass-panel rounded-xl border p-4 space-y-2">

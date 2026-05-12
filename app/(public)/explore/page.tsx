@@ -1,10 +1,5 @@
 import { listRecentPublishedVideos } from "@/lib/data/videos";
 import { listLiveRooms } from "@/lib/data/live-rooms";
-import {
-  listTopTickers,
-  listVideosForTicker,
-  getTickerBySymbol,
-} from "@/lib/data/tickers";
 import { PageViewEvent } from "@/components/analytics/page-view-event";
 import { Events } from "@/lib/posthog/events";
 import { ExperimentQualitySignal } from "@/components/experiments/experiment-quality-signal";
@@ -21,7 +16,6 @@ export const metadata = {
 };
 
 interface ExploreSearchParams {
-  ticker?: string;
   q?: string;
 }
 
@@ -31,38 +25,12 @@ export default async function ExplorePage({
   searchParams: Promise<ExploreSearchParams>;
 }) {
   const sp = await searchParams;
-  const tickerSymbol = sp.ticker?.toUpperCase().trim();
   const query = sp.q?.trim() ?? "";
   const normalizedQuery = query.toLowerCase();
-
-  const tickerRow = tickerSymbol ? await getTickerBySymbol(tickerSymbol) : null;
-
-  const [tickerVideos, allVideos, live, topTickers] = await Promise.all([
-    tickerRow ? listVideosForTicker(tickerRow.id, 36) : Promise.resolve([]),
-    !tickerRow ? listRecentPublishedVideos({ limit: 24 }) : Promise.resolve([]),
+  const [allCandidateVideos, live] = await Promise.all([
+    listRecentPublishedVideos({ limit: 24 }),
     listLiveRooms(),
-    listTopTickers(20),
   ]);
-
-  const allCandidateVideos = tickerRow
-    ? tickerVideos.map((v) => ({
-        id: v.id,
-        title: v.title,
-        description: v.description ?? "",
-        duration_seconds: v.duration_seconds,
-        thumbnail_url: null,
-        mux_playback_id: v.mux_playback_id,
-        published_at: v.published_at,
-        creator: v.profiles
-          ? {
-              id: v.creator_id,
-              handle: v.profiles.handle,
-              display_name: v.profiles.display_name,
-              avatar_url: v.profiles.avatar_url,
-            }
-          : null,
-      }))
-    : allVideos;
   const videos = normalizedQuery
     ? allCandidateVideos.filter((v) => {
         const haystack = [
@@ -91,40 +59,32 @@ export default async function ExplorePage({
     : live;
   const rankedLive = defaultFeedRanker.rankLiveRooms(filteredLive, {
     query: query || undefined,
-    ticker: tickerRow?.symbol,
   });
   const rankedVideos = defaultFeedRanker.rankVideos(videos, {
     query: query || undefined,
-    ticker: tickerRow?.symbol,
   });
   return (
     <>
       <ExperimentQualitySignal signal="route_continuation" path="/explore" />
       <PageViewEvent
         event={Events.ExploreView}
-        properties={tickerRow ? { ticker_id: tickerRow.id, symbol: tickerRow.symbol } : undefined}
+        properties={undefined}
       />
       <MobileDesktopSwitch
         mobile={
           <ExploreMobile
             query={query}
             normalizedQuery={normalizedQuery}
-            tickerSymbol={tickerSymbol}
-            tickerRow={tickerRow}
             rankedLive={rankedLive}
             rankedVideos={rankedVideos}
-            topTickers={topTickers}
           />
         }
         desktop={
           <ExploreDesktop
             query={query}
             normalizedQuery={normalizedQuery}
-            tickerSymbol={tickerSymbol}
-            tickerRow={tickerRow}
             rankedLive={rankedLive}
             rankedVideos={rankedVideos}
-            topTickers={topTickers}
           />
         }
       />

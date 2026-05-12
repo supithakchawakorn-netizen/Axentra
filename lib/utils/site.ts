@@ -10,4 +10,4 @@ export function siteUrl(): string {
 export const APP_NAME = "Varg Packs";
 
 export const APP_DESCRIPTION =
-  "Wolfpack-themed market commentary, live and on demand, with creator brokerage links shown read-only.";
+  "Community-first video and live platform for identity, trust, and contribution.";

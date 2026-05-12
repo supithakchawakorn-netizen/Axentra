@@ -10,8 +10,12 @@ import {
   type EditVideoInput,
   type SetVisibilityInput,
 } from "@/types/video";
+import { studioGuestModeEnabled } from "@/lib/env";
 
 export async function editVideo(input: EditVideoInput): Promise<{ ok: boolean; error?: string }> {
+  if (studioGuestModeEnabled()) {
+    return { ok: true };
+  }
   const parsed = EditVideoInputZ.safeParse(input);
   if (!parsed.success) {
     return { ok: false, error: parsed.error.issues[0]?.message ?? "Invalid input." };
@@ -20,7 +24,10 @@ export async function editVideo(input: EditVideoInput): Promise<{ ok: boolean; e
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { ok: false, error: "Not signed in." };
+  if (!user) {
+    if (studioGuestModeEnabled()) return { ok: true };
+    return { ok: false, error: "Not signed in." };
+  }
 
   const { error } = await supabase
     .from("videos")
@@ -59,6 +66,9 @@ export async function editVideo(input: EditVideoInput): Promise<{ ok: boolean; e
 export async function setVisibility(
   input: SetVisibilityInput,
 ): Promise<{ ok: boolean; error?: string }> {
+  if (studioGuestModeEnabled()) {
+    return { ok: true };
+  }
   const parsed = SetVisibilityInputZ.safeParse(input);
   if (!parsed.success) {
     return { ok: false, error: parsed.error.issues[0]?.message ?? "Invalid input." };
@@ -67,7 +77,10 @@ export async function setVisibility(
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { ok: false, error: "Not signed in." };
+  if (!user) {
+    if (studioGuestModeEnabled()) return { ok: true };
+    return { ok: false, error: "Not signed in." };
+  }
 
   const { error } = await supabase
     .from("videos")
@@ -84,6 +97,9 @@ export async function setVisibility(
 export async function deleteVideo(
   input: DeleteVideoInput,
 ): Promise<{ ok: boolean; error?: string }> {
+  if (studioGuestModeEnabled()) {
+    return { ok: true };
+  }
   const parsed = DeleteVideoInputZ.safeParse(input);
   if (!parsed.success) {
     return { ok: false, error: parsed.error.issues[0]?.message ?? "Invalid input." };
@@ -92,7 +108,10 @@ export async function deleteVideo(
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { ok: false, error: "Not signed in." };
+  if (!user) {
+    if (studioGuestModeEnabled()) return { ok: true };
+    return { ok: false, error: "Not signed in." };
+  }
 
   const { error } = await supabase
     .from("videos")

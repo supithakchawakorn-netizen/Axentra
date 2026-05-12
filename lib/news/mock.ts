@@ -1,5 +1,11 @@
 import "server-only";
-import type { NewsHeadline } from "@/lib/openai/prompts/news";
+
+export interface NewsHeadline {
+  title: string;
+  source: string;
+  publishedAt: string;
+  snippet: string;
+}
 
 /**
  * Deterministic mock news provider used when no real provider is configured.

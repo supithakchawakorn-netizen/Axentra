@@ -1,16 +1,14 @@
 import type { MetadataRoute } from "next";
 import { siteUrl } from "@/lib/utils/site";
 import { listLiveRooms } from "@/lib/data/live-rooms";
-import { listTopTickers } from "@/lib/data/tickers";
 import { listRecentPublishedVideos } from "@/lib/data/videos";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = siteUrl();
   const now = new Date();
-  const [videos, rooms, tickers] = await Promise.all([
+  const [videos, rooms] = await Promise.all([
     listRecentPublishedVideos({ limit: 100 }),
     listLiveRooms(),
-    listTopTickers(100),
   ]);
 
   const creatorHandles = new Set<string>();
@@ -61,13 +59,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.75,
   }));
 
-  const tickerRoutes: MetadataRoute.Sitemap = tickers.map((ticker) => ({
-    url: `${base}/t/${ticker.symbol.toLowerCase()}`,
-    lastModified: now,
-    changeFrequency: "daily",
-    priority: 0.7,
-  }));
-
   const creatorRoutes: MetadataRoute.Sitemap = Array.from(creatorHandles).map(
     (handle) => ({
       url: `${base}/u/${handle}`,
@@ -81,7 +72,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...staticRoutes,
     ...videoRoutes,
     ...roomRoutes,
-    ...tickerRoutes,
     ...creatorRoutes,
   ];
 }

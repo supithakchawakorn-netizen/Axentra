@@ -4,8 +4,7 @@ function isSensitivePath(url: string | undefined): boolean {
   if (!url) return false;
   return (
     url.includes("/api/webhooks/") ||
-    url.includes("/studio/broker") ||
-    url.includes("/api/snaptrade/")
+    url.includes("/studio/settings")
   );
 }
 

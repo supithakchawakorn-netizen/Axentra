@@ -39,8 +39,8 @@ export function CreateLiveForm() {
       <section className="glass-panel rounded-lg border p-4 space-y-1.5">
         <p className="text-sm font-medium">Time-to-go-live guide</p>
         <ul className="text-muted-foreground space-y-1 text-xs">
-          <li>1) Use a specific title (session + market context).</li>
-          <li>2) Tag relevant tickers so your room appears in ticker discovery.</li>
+          <li>1) Use a specific title for your community session.</li>
+          <li>2) Tag relevant topics so your room appears in discovery.</li>
           <li>3) Start stream only when your mic/camera setup is ready.</li>
         </ul>
       </section>
@@ -72,7 +72,7 @@ export function CreateLiveForm() {
       </div>
 
       <div className="space-y-3 rounded-lg border p-4">
-        <p className="text-sm font-medium">Related tickers</p>
+        <p className="text-sm font-medium">Related topics</p>
         <TickerPicker value={tickers} onChange={setTickers} disabled={isPending} />
       </div>
 

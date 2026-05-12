@@ -1,38 +1,40 @@
-# Analytics Audit Matrix (V1)
+# Analytics Audit Matrix
 
-Use this matrix to keep `docs/frontend/frontend-rules.md` event requirements aligned with implementation.
+## Active event taxonomy (social pivot)
 
-## View events
+- `home_view`
+- `explore_view`
+- `live_directory_view`
+- `live_view`
+- `live_join`
+- `live_room_create`
+- `live_room_start`
+- `live_room_end`
+- `video_view`
+- `video_play`
+- `video_25`
+- `video_50`
+- `video_75`
+- `video_100`
+- `reputation_panel_view`
+- `reputation_component_view`
+- `content_helpful_vote`
+- `content_not_helpful_vote`
+- `creator_consistency_milestone`
+- `trusted_creator_return_view`
+- `experiment_impression`
+- `experiment_click`
+- `experiment_quality_signal`
 
-| Event | Current emitter | Status |
-|---|---|---|
-| `home_view` | `app/(public)/page.tsx` via `PageViewEvent` | Implemented |
-| `explore_view` | `app/(public)/explore/page.tsx` via `PageViewEvent` | Implemented |
-| `live_directory_view` | `app/(public)/live/page.tsx` via `PageViewEvent` | Implemented |
-| `ticker_view` | `app/(public)/t/[ticker]/page.tsx` via `PageViewEvent` | Implemented |
-| `video_view` | `components/video/video-player.tsx` | Implemented |
-| `live_view` | `app/(public)/room/[roomId]/page.tsx` + `components/live/live-viewer-shell.tsx` | Implemented |
+## Retired event families
 
-## Engagement events
+- ticker events
+- broker connect/visibility/disconnect
+- waitlist submit
 
-| Event | Current emitter | Status |
-|---|---|---|
-| `video_play` | `components/video/video-player.tsx` | Implemented |
-| `video_25` / `video_50` / `video_75` / `video_100` | `components/video/video-player.tsx` | Implemented |
-| `live_join` | `components/live/live-viewer-shell.tsx` | Implemented |
+## Validation checklist
 
-## Creator + ops events
+- Home, explore, live, video, room, and profile fire expected page-level events.
+- Helpfulness feedback emits exactly one vote event per action.
+- No finance-specific events remain in client or server captures.
 
-| Event | Current emitter | Status |
-|---|---|---|
-| `creator_signup` | Auth/signup flow | Implemented |
-| `creator_signin` | Auth/sign-in flow | Implemented |
-| `video_upload_start` / `video_upload_complete` | Studio upload flow | Implemented |
-| `live_room_create` / `live_room_start` / `live_room_end` | Studio live flow | Implemented |
-| `broker_connect_start` / `broker_connect_complete` / `broker_visibility_toggle` | Partially mapped to broker events | Needs naming alignment |
-| `waitlist_submit` | `app/api/waitlist/route.ts` and pricing flow | Implemented |
-
-## Audit cadence
-
-- Re-run this matrix whenever new funnel events are added.
-- If event names change in `lib/posthog/events.ts`, update `frontend-rules.md` and this matrix in the same PR.

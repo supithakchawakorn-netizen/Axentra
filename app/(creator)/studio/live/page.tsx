@@ -57,16 +57,15 @@ export default async function StudioLivePage() {
             <CardHeader>
               <CardTitle className="text-base text-amber-100">Live control preview</CardTitle>
               <CardDescription className="text-amber-200/90">
-                Sign in to actually start broadcasting. This preview lets you inspect layout and creator controls.
+                Guest mode enabled. You can run live flow actions in preview mode.
               </CardDescription>
             </CardHeader>
             <CardContent className="text-xs text-amber-100/90">
-              Use this mode to validate UX flow, then authenticate when you are ready for real LiveKit rooms.
+              Actions run with simulated backend responses unless you sign in.
             </CardContent>
           </Card>
-        ) : (
-          <CreateLiveForm />
-        )}
+        ) : null}
+        <CreateLiveForm />
       </section>
 
       <section className="space-y-6">

@@ -1,7 +1,6 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
 import { supabaseConfigured } from "@/lib/env";
-import { TICKER_PROMPT_VERSION } from "@/lib/openai/prompts/ticker";
 import {
   getDemoTickerBySymbol,
   listDemoLiveRoomsForTicker,
@@ -15,18 +14,6 @@ export interface TickerRow {
   name: string;
   exchange: string | null;
   country: string | null;
-}
-
-export interface TickerSummaryRow {
-  body: string;
-  generated_at: string;
-  expires_at: string;
-}
-
-export interface TickerNewsSummaryRow {
-  body: string;
-  as_of_date: string;
-  generated_at: string;
 }
 
 export async function getTickerBySymbol(symbol: string): Promise<TickerRow | null> {
@@ -68,33 +55,6 @@ export async function listTickersByIds(ids: string[]): Promise<TickerRow[]> {
     .select("id, symbol, name, exchange, country")
     .in("id", ids);
   return (data as TickerRow[] | null) ?? [];
-}
-
-export async function getTickerSummary(tickerId: string): Promise<TickerSummaryRow | null> {
-  if (!supabaseConfigured()) return null;
-  const supabase = await createClient();
-  const { data } = await supabase
-    .from("ticker_summaries")
-    .select("body, generated_at, expires_at")
-    .eq("ticker_id", tickerId)
-    .eq("prompt_version", TICKER_PROMPT_VERSION)
-    .maybeSingle();
-  return (data as TickerSummaryRow | null) ?? null;
-}
-
-export async function getLatestNewsSummary(
-  tickerId: string,
-): Promise<TickerNewsSummaryRow | null> {
-  if (!supabaseConfigured()) return null;
-  const supabase = await createClient();
-  const { data } = await supabase
-    .from("ticker_news_summaries")
-    .select("body, as_of_date, generated_at")
-    .eq("ticker_id", tickerId)
-    .order("as_of_date", { ascending: false })
-    .limit(1)
-    .maybeSingle();
-  return (data as TickerNewsSummaryRow | null) ?? null;
 }
 
 export async function listVideosForTicker(tickerId: string, limit = 24) {

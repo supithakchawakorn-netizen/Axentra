@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { UpdateProfileInputZ, type UpdateProfileInput } from "@/types/profile";
+import { studioGuestModeEnabled } from "@/lib/env";
 
 export async function updateProfile(
   input: UpdateProfileInput,
@@ -19,7 +20,10 @@ export async function updateProfile(
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { ok: false, error: "Not signed in." };
+  if (!user) {
+    if (studioGuestModeEnabled()) return { ok: true };
+    return { ok: false, error: "Not signed in." };
+  }
 
   const { error } = await supabase
     .from("profiles")
@@ -48,22 +52,10 @@ export async function deleteAccount(): Promise<{ ok: boolean; error?: string }> 
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { ok: false, error: "Not signed in." };
-
-  // Best-effort cleanup of broker rows before auth deletion cascades.
-  await supabase.from("broker_accounts").delete().in(
-    "connection_id",
-    (
-      (
-        await supabase
-          .from("broker_connections")
-          .select("id")
-          .eq("user_id", user.id)
-      ).data ?? []
-    ).map((r) => (r as { id: string }).id),
-  );
-  await supabase.from("broker_connections").delete().eq("user_id", user.id);
-  await supabase.from("broker_visibility").delete().eq("user_id", user.id);
+  if (!user) {
+    if (studioGuestModeEnabled()) return { ok: true };
+    return { ok: false, error: "Not signed in." };
+  }
 
   try {
     const admin = createAdminClient();

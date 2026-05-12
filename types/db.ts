@@ -39,147 +39,73 @@ export type Database = {
   }
   public: {
     Tables: {
-      broker_accounts: {
+      communities: {
         Row: {
-          account_name: string
-          account_type: string | null
-          broker_name: string | null
-          cached_balance: number | null
-          cached_balance_updated_at: string | null
-          connection_id: string
           created_at: string
-          currency: string
-          external_id: string
+          description: string
           id: string
+          name: string
+          owner_id: string
+          slug: string
           updated_at: string
         }
         Insert: {
-          account_name: string
-          account_type?: string | null
-          broker_name?: string | null
-          cached_balance?: number | null
-          cached_balance_updated_at?: string | null
-          connection_id: string
           created_at?: string
-          currency?: string
-          external_id: string
+          description?: string
           id?: string
+          name: string
+          owner_id: string
+          slug: string
           updated_at?: string
         }
         Update: {
-          account_name?: string
-          account_type?: string | null
-          broker_name?: string | null
-          cached_balance?: number | null
-          cached_balance_updated_at?: string | null
-          connection_id?: string
           created_at?: string
-          currency?: string
-          external_id?: string
+          description?: string
           id?: string
+          name?: string
+          owner_id?: string
+          slug?: string
           updated_at?: string
         }
         Relationships: [
           {
-            foreignKeyName: "broker_accounts_connection_id_fkey"
-            columns: ["connection_id"]
+            foreignKeyName: "communities_owner_id_fkey"
+            columns: ["owner_id"]
             isOneToOne: false
-            referencedRelation: "broker_connections"
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
       }
-      broker_activities: {
+      community_memberships: {
         Row: {
-          account_id: string
-          created_at: string
-          external_id: string | null
-          id: string
-          occurred_at: string
-          price: number | null
-          quantity: number | null
-          symbol: string | null
-          type: string
-        }
-        Insert: {
-          account_id: string
-          created_at?: string
-          external_id?: string | null
-          id?: string
-          occurred_at: string
-          price?: number | null
-          quantity?: number | null
-          symbol?: string | null
-          type: string
-        }
-        Update: {
-          account_id?: string
-          created_at?: string
-          external_id?: string | null
-          id?: string
-          occurred_at?: string
-          price?: number | null
-          quantity?: number | null
-          symbol?: string | null
-          type?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "broker_activities_account_id_fkey"
-            columns: ["account_id"]
-            isOneToOne: false
-            referencedRelation: "broker_accounts"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "broker_activities_account_id_fkey"
-            columns: ["account_id"]
-            isOneToOne: false
-            referencedRelation: "public_broker_accounts"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      broker_connections: {
-        Row: {
-          connected_at: string | null
-          created_at: string
-          id: string
-          last_sync_at: string | null
-          provider: string
-          snaptrade_user_id: string | null
-          snaptrade_user_secret_id: string | null
-          status: Database["public"]["Enums"]["broker_status"]
-          updated_at: string
+          community_id: string
+          joined_at: string
+          role: string
           user_id: string
         }
         Insert: {
-          connected_at?: string | null
-          created_at?: string
-          id?: string
-          last_sync_at?: string | null
-          provider?: string
-          snaptrade_user_id?: string | null
-          snaptrade_user_secret_id?: string | null
-          status?: Database["public"]["Enums"]["broker_status"]
-          updated_at?: string
+          community_id: string
+          joined_at?: string
+          role?: string
           user_id: string
         }
         Update: {
-          connected_at?: string | null
-          created_at?: string
-          id?: string
-          last_sync_at?: string | null
-          provider?: string
-          snaptrade_user_id?: string | null
-          snaptrade_user_secret_id?: string | null
-          status?: Database["public"]["Enums"]["broker_status"]
-          updated_at?: string
+          community_id?: string
+          joined_at?: string
+          role?: string
           user_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "broker_connections_user_id_fkey"
+            foreignKeyName: "community_memberships_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: false
+            referencedRelation: "communities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "community_memberships_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
@@ -187,89 +113,80 @@ export type Database = {
           },
         ]
       }
-      broker_positions: {
+      community_posts: {
         Row: {
-          account_id: string
-          avg_price: number | null
+          author_id: string
+          body: string
+          community_id: string
           created_at: string
           id: string
-          last_synced_at: string
-          market_value: number | null
-          quantity: number
-          symbol: string
+          title: string
           updated_at: string
         }
         Insert: {
-          account_id: string
-          avg_price?: number | null
+          author_id: string
+          body?: string
+          community_id: string
           created_at?: string
           id?: string
-          last_synced_at?: string
-          market_value?: number | null
-          quantity?: number
-          symbol: string
+          title: string
           updated_at?: string
         }
         Update: {
-          account_id?: string
-          avg_price?: number | null
+          author_id?: string
+          body?: string
+          community_id?: string
           created_at?: string
           id?: string
-          last_synced_at?: string
-          market_value?: number | null
-          quantity?: number
-          symbol?: string
+          title?: string
           updated_at?: string
         }
         Relationships: [
           {
-            foreignKeyName: "broker_positions_account_id_fkey"
-            columns: ["account_id"]
+            foreignKeyName: "community_posts_author_id_fkey"
+            columns: ["author_id"]
             isOneToOne: false
-            referencedRelation: "broker_accounts"
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "broker_positions_account_id_fkey"
-            columns: ["account_id"]
+            foreignKeyName: "community_posts_community_id_fkey"
+            columns: ["community_id"]
             isOneToOne: false
-            referencedRelation: "public_broker_accounts"
+            referencedRelation: "communities"
             referencedColumns: ["id"]
           },
         ]
       }
-      broker_visibility: {
+      creator_reputation_scores: {
         Row: {
-          created_at: string
-          show_activity: boolean
-          show_balances: boolean
-          show_broker_name: boolean
-          show_positions: boolean
+          community_trust: number
+          consistency: number
+          creator_id: string
+          insight_quality: number
+          transparency: number
           updated_at: string
-          user_id: string
         }
         Insert: {
-          created_at?: string
-          show_activity?: boolean
-          show_balances?: boolean
-          show_broker_name?: boolean
-          show_positions?: boolean
+          community_trust?: number
+          consistency?: number
+          creator_id: string
+          insight_quality?: number
+          transparency?: number
           updated_at?: string
-          user_id: string
         }
         Update: {
-          created_at?: string
-          show_activity?: boolean
-          show_balances?: boolean
-          show_broker_name?: boolean
-          show_positions?: boolean
+          community_trust?: number
+          consistency?: number
+          creator_id?: string
+          insight_quality?: number
+          transparency?: number
           updated_at?: string
-          user_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "broker_visibility_user_id_fkey"
-            columns: ["user_id"]
+            foreignKeyName: "creator_reputation_scores_creator_id_fkey"
+            columns: ["creator_id"]
             isOneToOne: true
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -401,135 +318,6 @@ export type Database = {
           },
           {
             foreignKeyName: "room_tickers_ticker_id_fkey"
-            columns: ["ticker_id"]
-            isOneToOne: false
-            referencedRelation: "tickers"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      subscriptions: {
-        Row: {
-          created_at: string
-          current_period_end: string | null
-          id: string
-          status: string
-          stripe_customer_id: string | null
-          stripe_subscription_id: string | null
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          current_period_end?: string | null
-          id?: string
-          status?: string
-          stripe_customer_id?: string | null
-          stripe_subscription_id?: string | null
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          current_period_end?: string | null
-          id?: string
-          status?: string
-          stripe_customer_id?: string | null
-          stripe_subscription_id?: string | null
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "subscriptions_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      ticker_news_summaries: {
-        Row: {
-          as_of_date: string
-          body: string
-          created_at: string
-          generated_at: string
-          headline_count: number
-          id: string
-          model: string
-          prompt_version: number
-          ticker_id: string
-        }
-        Insert: {
-          as_of_date: string
-          body: string
-          created_at?: string
-          generated_at?: string
-          headline_count?: number
-          id?: string
-          model: string
-          prompt_version?: number
-          ticker_id: string
-        }
-        Update: {
-          as_of_date?: string
-          body?: string
-          created_at?: string
-          generated_at?: string
-          headline_count?: number
-          id?: string
-          model?: string
-          prompt_version?: number
-          ticker_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "ticker_news_summaries_ticker_id_fkey"
-            columns: ["ticker_id"]
-            isOneToOne: false
-            referencedRelation: "tickers"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      ticker_summaries: {
-        Row: {
-          body: string
-          created_at: string
-          expires_at: string
-          generated_at: string
-          id: string
-          model: string
-          prompt_version: number
-          source_count: number
-          ticker_id: string
-        }
-        Insert: {
-          body: string
-          created_at?: string
-          expires_at: string
-          generated_at?: string
-          id?: string
-          model: string
-          prompt_version?: number
-          source_count?: number
-          ticker_id: string
-        }
-        Update: {
-          body?: string
-          created_at?: string
-          expires_at?: string
-          generated_at?: string
-          id?: string
-          model?: string
-          prompt_version?: number
-          source_count?: number
-          ticker_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "ticker_summaries_ticker_id_fkey"
             columns: ["ticker_id"]
             isOneToOne: false
             referencedRelation: "tickers"
@@ -676,72 +464,9 @@ export type Database = {
       }
     }
     Views: {
-      public_broker_accounts: {
-        Row: {
-          account_name: string | null
-          broker_name: string | null
-          cached_balance: number | null
-          cached_balance_updated_at: string | null
-          currency: string | null
-          id: string | null
-          user_id: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "broker_connections_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      public_broker_activities: {
-        Row: {
-          id: string | null
-          occurred_at: string | null
-          price: number | null
-          quantity: number | null
-          symbol: string | null
-          type: string | null
-          user_id: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "broker_connections_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      public_broker_positions: {
-        Row: {
-          avg_price: number | null
-          id: string | null
-          last_synced_at: string | null
-          market_value: number | null
-          quantity: number | null
-          symbol: string | null
-          user_id: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "broker_connections_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
+      [_ in never]: never
     }
     Functions: {
-      maintain_verified_broker: {
-        Args: { target_user_id: string }
-        Returns: undefined
-      }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
     }

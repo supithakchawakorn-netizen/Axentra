@@ -1,23 +1,30 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
-import type { PublicLiveRoom } from "@/lib/data/live-rooms";
 import type { PublicVideoSummary } from "@/lib/data/videos";
-import type { TickerRow } from "@/lib/data/tickers";
 import { PageHeader } from "@/components/shared/page-header";
 import { SectionHeader } from "@/components/shared/section-header";
-import { EmptyState } from "@/components/shared/empty-state";
-import { LiveRoomCard } from "@/components/live/live-room-card";
 import { VideoCard } from "@/components/video/video-card";
+import { MarketTape } from "@/components/market/market-tape";
 import { HomeGrowthLazy } from "@/components/experiments/home-growth-lazy";
 import { ContinueWatchingStrip } from "@/components/video/continue-watching-strip";
 import { WolfpackHeroStrip } from "@/components/shared/wolfpack-hero-strip";
+import {
+  HOME_MARKET_CATEGORIES,
+  filterVideosByCategory,
+  getHomeMarketCategory,
+  type MarketCategory,
+} from "@/components/pages/home/market-categories";
 
 interface HomeMobileProps {
   videos: PublicVideoSummary[];
-  live: PublicLiveRoom[];
-  topTickers: TickerRow[];
+  initialCategory: MarketCategory;
 }
-
-export function HomeMobile({ videos, live, topTickers }: HomeMobileProps) {
+export function HomeMobile({ videos, initialCategory }: HomeMobileProps) {
+  const [selectedCategory, setSelectedCategory] = useState<MarketCategory>(initialCategory);
+  const activeCategory = getHomeMarketCategory(selectedCategory);
+  const filteredVideos = filterVideosByCategory(videos, activeCategory.key);
   return (
     <main className="yt-page-shell w-full space-y-6 px-1 py-5">
       <PageHeader
@@ -31,55 +38,56 @@ export function HomeMobile({ videos, live, topTickers }: HomeMobileProps) {
         subtitle="Resume from where you left off."
       />
 
-      {topTickers.length > 0 ? (
-        <section className="space-y-3">
-          <SectionHeader title="Trending" subtitle="Tap to jump by symbol." />
-          <ul className="flex snap-x snap-mandatory gap-2 overflow-x-auto pb-1">
-            {topTickers.map((ticker) => (
-              <li key={ticker.id} className="snap-start">
-                <Link
-                  href={`/t/${ticker.symbol}`}
-                  prefetch={false}
-                  className="bg-secondary text-secondary-foreground inline-flex rounded-full px-3 py-1.5 font-mono text-xs"
+      <section className="space-y-3">
+        <ul className="flex snap-x snap-mandatory gap-2 overflow-x-auto pb-1">
+          {HOME_MARKET_CATEGORIES.map((category) => {
+            const isActive = category.key === activeCategory.key;
+            return (
+              <li key={category.key} className="snap-start">
+                <button
+                  type="button"
+                  onClick={() => setSelectedCategory(category.key)}
+                  className={`inline-flex rounded-full border px-3 py-1.5 text-xs ${
+                    isActive
+                      ? "bg-primary text-primary-foreground border-primary"
+                      : "bg-secondary text-secondary-foreground"
+                  }`}
                 >
-                  ${ticker.symbol}
-                </Link>
+                  {category.label}
+                </button>
               </li>
-            ))}
-          </ul>
+            );
+          })}
+        </ul>
+        <section className="space-y-2">
+          <SectionHeader title={activeCategory.description} />
+          <MarketTape symbols={activeCategory.symbols} compact />
         </section>
-      ) : null}
-
-      {live.length > 0 ? (
-        <section className="space-y-3">
-          <SectionHeader title={`Live now (${live.length})`} />
-          <ul className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2">
-            {live.slice(0, 6).map((room) => (
-              <li key={room.id} className="w-[88%] min-w-[88%] snap-start">
-                <LiveRoomCard room={room} prefetch={false} />
-              </li>
-            ))}
-          </ul>
-        </section>
-      ) : null}
+      </section>
 
       <section className="space-y-3">
         <SectionHeader
-          title="Recent videos"
+          title={`${activeCategory.label} creator videos`}
+          subtitle="Videos related to your selected category."
           action={
             <Link href="/explore" prefetch={false} className="text-sm text-muted-foreground">
               See all
             </Link>
           }
         />
-        {videos.length === 0 ? (
-          <EmptyState
-            title="No videos yet."
-            description="Once creators publish their first videos, they'll appear here."
-          />
+        {filteredVideos.length === 0 ? (
+          <div className="space-y-3">
+            {activeCategory.examples.map((upload) => (
+              <article key={upload.title} className="rounded-xl border bg-card/60 p-4">
+                <p className="text-muted-foreground mb-2 text-xs uppercase tracking-wide">Example</p>
+                <p className="font-medium">{upload.title}</p>
+                <p className="text-muted-foreground mt-2 text-sm">{upload.category}</p>
+              </article>
+            ))}
+          </div>
         ) : (
           <div className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2">
-            {videos.map((video) => (
+            {filteredVideos.map((video) => (
               <div
                 key={video.id}
                 className="w-[85%] min-w-[85%] snap-start"

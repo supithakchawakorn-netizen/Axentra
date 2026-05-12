@@ -3,11 +3,10 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  CircleDollarSign,
   Compass,
   Home,
   Radio,
-  TrendingUp,
+  Users,
   TvMinimalPlay,
   Wrench,
 } from "lucide-react";
@@ -17,12 +16,12 @@ const ITEMS = [
   { href: "/", label: "Home", icon: Home },
   { href: "/explore", label: "Explore", icon: Compass },
   { href: "/live", label: "Live", icon: Radio },
+  { href: "/u/marketpulse", label: "Communities", icon: Users },
   { href: "/setup", label: "Setup", icon: Wrench },
-  { href: "/pricing", label: "Pricing", icon: CircleDollarSign },
   { href: "/sign-in?next=/studio", label: "Create", icon: TvMinimalPlay },
 ] as const;
 
-const TICKERS = ["SPY", "QQQ", "NVDA", "AAPL", "MSFT", "TSLA"] as const;
+const TOPICS = ["Builders", "Creators", "Growth", "Community", "Learning"] as const;
 
 export function PublicSidebar() {
   const pathname = usePathname();
@@ -59,17 +58,17 @@ export function PublicSidebar() {
 
       <div className="space-y-2 border-t pt-4">
         <p className="text-muted-foreground flex items-center gap-2 px-3 text-xs uppercase tracking-wider">
-          <TrendingUp className="size-3.5" />
-          Tickers
+          <Users className="size-3.5" />
+          Topics
         </p>
         <ul className="flex flex-wrap gap-1 px-3">
-          {TICKERS.map((ticker) => (
-            <li key={ticker}>
+          {TOPICS.map((topic) => (
+            <li key={topic}>
               <Link
-                href={`/explore?ticker=${ticker}`}
-                className="bg-muted premium-lift hover:bg-accent inline-flex rounded-full px-2 py-1 font-mono text-[11px]"
+                href={`/explore?q=${encodeURIComponent(topic)}`}
+                className="bg-muted premium-lift hover:bg-accent inline-flex rounded-full px-2 py-1 text-[11px]"
               >
-                ${ticker}
+                {topic}
               </Link>
             </li>
           ))}

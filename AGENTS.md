@@ -8,7 +8,7 @@ If something here conflicts with a doc under `docs/`, fix the doc and keep this 
 
 ## 1. Mission (one paragraph)
 
-Varg Packs is a web-first video and live platform for retail market commentary. Anyone can watch videos and live rooms without signing in. Creators sign in to publish, host live rooms, and (optionally) link a brokerage account read-only so viewers can verify their positions and performance. V1 is a media product, not a trading product.
+Varg Packs is a web-first social platform for identity, reputation, and community participation built around video and live conversation. People join communities, contribute through posts/videos/live sessions, and build trust through consistent, meaningful interaction. V1 is community-first: build reputation, not followers.
 
 ---
 
@@ -16,28 +16,22 @@ Varg Packs is a web-first video and live platform for retail market commentary. 
 
 V1 ships:
 
-- Homepage, public feed/explore, live directory, public ticker pages, creator profiles
+- Homepage, public feed/explore, live directory, community hubs, creator profiles
 - Creator auth (Google + email magic link)
-- Creator studio (videos, upload, live, broker, settings)
+- Creator studio (videos, upload, live, settings)
 - Video watch page (Mux), live room page (LiveKit)
-- AI ticker / news summaries (OpenAI, cached, regenerated only via cron)
-- Creator-side brokerage link (SnapTrade, **read-only**)
-- Creator monetization: viewer donations, gift SKUs, creator-scoped ad-free unlock
-- Display + video ads with entitlement-aware suppression
-- Pricing page and monetization policy surfaces
+- Community reputation signals (helpfulness, consistency, contribution quality)
+- Profile-level trust and identity surfaces
 - Web only. PWA manifest is allowed; no React Native, no Capacitor, no native shells.
 
 V1 **does not** ship:
 
-- Viewer social graph features (follows, playlists, public viewer profiles, social notifications)
-- Viewer brokerage linking
-- Trade execution of any kind
-- Copy trading
-- Follow-trade (planned later as Premium, **using each viewer's own linked individual account — never pooled money**)
-- Pooled capital, fund-like products, anything that resembles managing money for others
+- Brokerage linking
+- Trade execution, investing, copy-trading, speculative products
+- Marketplace-style financial transactions
 - Native mobile apps
-- Any chart UI: candles, indicators, watchlists, alerts, sparklines, mini-charts, drawing tools. **No chart library is to be added in V1.**
-- Live chat written by anonymous users (chat-write rules below)
+- Asset-price charting/watchlist products as a core workflow
+- Unmoderated anonymous posting
 
 If a task asks for any of the above, **stop and flag it**. Do not silently expand scope.
 
@@ -54,9 +48,8 @@ See `docs/project/scope-v1.md` and `docs/project/non-goals.md` for the canonical
 | Auth + DB | Supabase | Postgres, Auth, RLS, Storage, Vault. |
 | VOD | Mux | Direct upload, signed playback for unlisted, public for listed. |
 | Live | LiveKit | Cloud rooms; tokens minted server-side; recording via Egress. |
-| Brokerage | SnapTrade | **Creators only. Read-only. No order endpoints used.** |
-| Payments | Stripe | Gift/donation checkout + settlement webhook + entitlement lifecycle in V1. |
-| AI | OpenAI | Ticker and news summaries. Server-side. Cached. Regenerated via cron only. |
+| Communities | Supabase + Postgres | Community hubs, memberships, contribution state. |
+| AI | OpenAI | Optional reputation/digest features server-side only. |
 | Analytics | PostHog | **EU cloud** (single region across the project). Anonymous distinct IDs for viewers. |
 | Errors | Sentry | Both server and client. Webhook bodies scrubbed. |
 | Email | Resend | Transactional only in V1. |
@@ -70,7 +63,7 @@ Secrets live in `.env.local` (dev) and Vercel project env (prod). Never commit s
 |---|---|---|
 | `NEXT_PUBLIC_*` | bundled to browser | Public URLs, public keys (Supabase anon, PostHog public key). |
 | `SUPABASE_SERVICE_ROLE_KEY` | server only | Admin client; webhook + cron only. |
-| `MUX_*`, `LIVEKIT_API_*`, `SNAPTRADE_*`, `STRIPE_SECRET_*`, `OPENAI_API_KEY`, `RESEND_API_KEY` | server only | Service-side calls. |
+| `MUX_*`, `LIVEKIT_API_*`, `OPENAI_API_KEY`, `RESEND_API_KEY` | server only | Service-side calls. |
 | `CRON_SECRET` | server only | Header check on `/api/cron/*`. |
 | `SENTRY_AUTH_TOKEN` | server only | Build-time source map upload. |
 
@@ -185,9 +178,11 @@ CI runs `lint`, `typecheck`, `test`, `build` on every PR. PRs that don't pass ca
 | What's in V1 | `docs/project/scope-v1.md` |
 | What's explicitly out | `docs/project/non-goals.md` |
 | Build order | `docs/project/roadmap.md` |
+| Reputation rollout checklist | `docs/project/reputation-implementation-checklist.md` |
 | End-to-end user flows | `docs/product/user-flows.md` |
 | Every page, what's on it | `docs/product/page-map.md` |
-| Brokerage link rules | `docs/product/creator-broker-link.md` |
+| Community and reputation strategy | `docs/product/reputation-strategy.md` |
+| Reputation strategy | `docs/product/reputation-strategy.md` |
 | AI summaries | `docs/product/ai-features.md` |
 | UI patterns and rules | `docs/frontend/frontend-rules.md` |
 | Route map | `docs/frontend/routes.md` |
@@ -204,17 +199,17 @@ Do:
 - Prefer Server Components, then Server Actions, then Route Handlers in that order (see §5 decision rule).
 - Add a migration for any schema change. Never edit a deployed migration.
 - Validate all external inputs with zod and verify webhook signatures.
+- Keep reputation features explainable; avoid opaque trust scoring.
 - Cache AI output in Postgres before returning. **Regeneration only happens in `/api/cron/*`** — never on the read path.
-- Treat SnapTrade as **read-only**. Use only account read endpoints. Never import or wrap an order/trade endpoint.
 - Rate-limit any unauthenticated POST endpoint with `lib/utils/rate-limit.ts` (token bucket keyed by IP + route).
 
 Do not:
 
-- Add viewer-side brokerage linking, trade execution, copy trading, follow-trade, pooled capital, or anything fund-like.
-- Add any chart UI (candles, indicators, sparklines, mini-charts) in V1.
+- Add brokerage, trading, investing, exchange, or marketplace-finance features.
+- Add speculative charting or price-terminal UX as a product pillar.
 - Add a native app or React Native code.
 - Bypass RLS by using the service role key from a client component or any non-webhook/non-cron route.
-- Commit secrets, fixtures with real PII, or real brokerage tokens.
+- Commit secrets or fixtures with real PII.
 - Hand-edit shadcn/ui generated files; re-run the CLI and add a wrapper component instead.
 - Put a secret behind `NEXT_PUBLIC_*`.
 
@@ -238,7 +233,7 @@ When in doubt: ask in the PR description, link the relevant doc, and stop.
 - All secrets server-side only. `NEXT_PUBLIC_*` vars are public; never put a secret behind that prefix.
 - Supabase RLS on by default for every table. Default policy is deny.
 - Sensitive long-lived tokens (e.g. `snaptrade_user_secret`) are stored using **Supabase Vault** (`vault.secrets`) and referenced by id from app rows. The plain text never lives in a regular table column.
-- Sentry scrubs request bodies for `/api/webhooks/*` and any path that touches SnapTrade.
+- Sentry scrubs request bodies for `/api/webhooks/*` and any sensitive profile/community mutation path.
 - No user-generated HTML rendered as `dangerouslySetInnerHTML`.
 
 ---

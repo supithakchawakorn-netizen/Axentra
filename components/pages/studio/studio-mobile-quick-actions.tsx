@@ -1,12 +1,11 @@
 import Link from "next/link";
-import { BarChart3, Clapperboard, Radio, Settings, Upload, Wallet } from "lucide-react";
+import { BarChart3, Clapperboard, Radio, Settings, Upload } from "lucide-react";
 
 const ACTIONS = [
   { href: "/studio/upload", label: "Upload", icon: Upload },
   { href: "/studio/live", label: "Go live", icon: Radio },
   { href: "/studio/videos", label: "Videos", icon: Clapperboard },
   { href: "/studio/analytics", label: "Analytics", icon: BarChart3 },
-  { href: "/studio/broker", label: "Broker", icon: Wallet },
   { href: "/studio/settings", label: "Settings", icon: Settings },
 ] as const;
 

@@ -8,6 +8,8 @@ import { Share2, ThumbsUp } from "lucide-react";
 import { CommentsSection } from "@/components/shared/comments-section";
 import type { DemoComment } from "@/lib/data/comments";
 import { ContinueWatchingStrip } from "@/components/video/continue-watching-strip";
+import { ContentHelpfulnessVote } from "@/components/shared/content-helpfulness-vote";
+import { inferMarketCategoryFromSymbols } from "@/lib/utils/market-category";
 
 interface VideoMobileProps {
   video: PublicVideoDetail;
@@ -27,6 +29,7 @@ export function VideoMobile({
   startAtSeconds,
 }: VideoMobileProps) {
   const nextVideo = recommended[0] ?? null;
+  const marketCategory = inferMarketCategoryFromSymbols(tickers.map((ticker) => ticker.symbol));
 
   return (
     <main className="w-full space-y-4 px-1 py-5">
@@ -95,6 +98,12 @@ export function VideoMobile({
           </p>
         </section>
       ) : null}
+
+      <ContentHelpfulnessVote
+        contentId={video.id}
+        contentType="video"
+        marketCategory={marketCategory}
+      />
 
       {nextVideo ? (
         <section className="glass-panel rounded-xl border p-4 space-y-2">

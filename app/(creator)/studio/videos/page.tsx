@@ -40,7 +40,7 @@ export default async function VideosPage() {
       />
       {previewMode ? (
         <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-200">
-          Guest preview mode: actions are hidden for sample videos.
+          Guest mode enabled: actions run in simulation mode for preview videos.
         </div>
       ) : null}
 
@@ -99,17 +99,13 @@ export default async function VideosPage() {
                     {formatDate(v.created_at)}
                   </td>
                   <td className="px-4 py-3 text-right">
-                    {previewMode ? (
-                      <span className="text-muted-foreground text-xs">Preview only</span>
-                    ) : (
-                      <VideoRowActions
-                        videoId={v.id}
-                        title={v.title}
-                        description={v.description}
-                        visibility={v.visibility}
-                        tickerIds={v.ticker_ids}
-                      />
-                    )}
+                    <VideoRowActions
+                      videoId={v.id}
+                      title={v.title}
+                      description={v.description}
+                      visibility={v.visibility}
+                      tickerIds={v.ticker_ids}
+                    />
                   </td>
                 </tr>
               ))}
