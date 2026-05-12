@@ -18,6 +18,7 @@
 - `/studio` — overview
 - `/studio/upload` — upload flow
 - `/studio/videos` — manage videos
+- `/studio/videos/[videoId]` — manage a single video
 - `/studio/live` — create/manage live rooms
 - `/studio/live/[roomId]` — studio room control
 - `/studio/settings` — creator settings

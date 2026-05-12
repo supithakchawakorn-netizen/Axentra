@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import MuxPlayer from "@mux/mux-player-react";
 import { usePostHog } from "posthog-js/react";
 import { Events } from "@/lib/posthog/events";
 import { saveWatchSession } from "@/lib/utils/watch-session";
@@ -16,6 +15,7 @@ interface VideoPlayerProps {
   creatorHandle?: string;
   durationSeconds?: number | null;
   startAtSeconds?: number;
+  status?: "pending" | "processing" | "ready" | "errored";
 }
 
 export function VideoPlayer({
@@ -28,6 +28,7 @@ export function VideoPlayer({
   creatorHandle,
   durationSeconds,
   startAtSeconds,
+  status,
 }: VideoPlayerProps) {
   const posthog = usePostHog();
   const firedMilestones = useRef<Set<number>>(new Set());
@@ -114,55 +115,33 @@ export function VideoPlayer({
     handleProgress(event.currentTarget);
   }
 
-  function handleMuxLoadedMetadata(event: unknown) {
-    const target = (event as { currentTarget?: { currentTime?: number; duration?: number } })
-      .currentTarget;
-    if (!target) return;
-    applyStartOffset(target);
-  }
+  const src: string | null = playbackId
+    ? `https://stream.mux.com/${playbackId}.m3u8`
+    : (playbackUrl ?? null);
 
-  function handleMuxTimeUpdate(event: unknown) {
-    const target = (event as { currentTarget?: { currentTime?: number; duration?: number } })
-      .currentTarget;
-    if (!target) return;
-    handleProgress(target);
-  }
-
-  if (!playbackId && !playbackUrl) {
+  if (!src) {
     return (
-      <p className="text-muted-foreground px-3 py-2 text-sm">
-        Video not available yet.
-      </p>
+      <div className="bg-muted flex aspect-video items-center justify-center rounded-lg">
+        <p className="text-muted-foreground text-sm">
+          {status === "processing" ? "Still processing…" : "Video unavailable."}
+        </p>
+      </div>
     );
   }
 
   return (
     <div className="bg-muted overflow-hidden rounded-lg border">
-      {playbackId ? (
-        <MuxPlayer
-          playbackId={playbackId}
-          metadata={{ video_id: videoId, video_title: title }}
-          poster={poster}
-          onPlay={() => posthog?.capture(Events.VideoPlay, { video_id: videoId })}
-          onLoadedMetadata={handleMuxLoadedMetadata}
-          onTimeUpdate={handleMuxTimeUpdate}
-          accentColor="#fafafa"
-          style={{ width: "100%", aspectRatio: "16 / 9" }}
-        />
-      ) : (
-        <video
-          controls
-          playsInline
-          preload="metadata"
-          poster={poster}
-          src={playbackUrl ?? undefined}
-          onPlay={() => posthog?.capture(Events.VideoPlay, { video_id: videoId })}
-          onLoadedMetadata={handleNativeLoadedMetadata}
-          onTimeUpdate={handleNativeTimeUpdate}
-          className="w-full"
-          style={{ aspectRatio: "16 / 9" }}
-        />
-      )}
+      <video
+        src={src}
+        controls
+        playsInline
+        preload="metadata"
+        poster={poster}
+        onPlay={() => posthog?.capture(Events.VideoPlay, { video_id: videoId })}
+        onLoadedMetadata={handleNativeLoadedMetadata}
+        onTimeUpdate={handleNativeTimeUpdate}
+        className="aspect-video w-full rounded-lg"
+      />
     </div>
   );
 }

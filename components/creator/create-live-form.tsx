@@ -9,7 +9,7 @@ import { createLiveRoom } from "@/app/(creator)/studio/live/_actions";
 import { TickerPicker } from "@/components/creator/ticker-picker";
 import type { TickerRow } from "@/lib/data/tickers";
 import { createClient } from "@/lib/supabase/client";
-import { studioGuestModeEnabled } from "@/lib/env";
+import { liveBuildingPaused, studioGuestModeEnabled } from "@/lib/env";
 
 export function CreateLiveForm() {
   const router = useRouter();
@@ -19,6 +19,7 @@ export function CreateLiveForm() {
   const [tickers, setTickers] = useState<TickerRow[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+  const paused = liveBuildingPaused();
 
   async function ensureStudioGuestUser() {
     const {
@@ -43,6 +44,10 @@ export function CreateLiveForm() {
 
   function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (paused) {
+      setError("Live creation is temporarily paused.");
+      return;
+    }
     setError(null);
     startTransition(async () => {
       const user = await ensureStudioGuestUser();
@@ -112,11 +117,13 @@ export function CreateLiveForm() {
       ) : null}
 
       <div className="flex flex-wrap items-center gap-3">
-        <Button type="submit" disabled={isPending}>
-          {isPending ? "Starting…" : "Start streaming"}
+        <Button type="submit" disabled={isPending || paused}>
+          {isPending ? "Starting…" : paused ? "Live paused" : "Start streaming"}
         </Button>
         <p className="text-muted-foreground text-xs">
-          You can end the room anytime from the broadcaster screen and keep a clean recording handoff.
+          {paused
+            ? "Live creation is paused for now. Existing live rooms can still be ended from Studio controls."
+            : "You can end the room anytime from the broadcaster screen and keep a clean recording handoff."}
         </p>
       </div>
     </form>

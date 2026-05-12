@@ -13,7 +13,7 @@ import {
 import { mintCoHostToken, mintCreatorToken } from "@/lib/livekit";
 import { captureServerEvent } from "@/lib/posthog/server";
 import { Events } from "@/lib/posthog/events";
-import { studioGuestModeEnabled } from "@/lib/env";
+import { liveBuildingPaused, studioGuestModeEnabled } from "@/lib/env";
 
 export interface CreateRoomResult {
   ok: true;
@@ -31,6 +31,12 @@ export interface ActionError {
 export async function createLiveRoom(
   input: CreateLiveRoomInput,
 ): Promise<CreateRoomResult | ActionError> {
+  if (liveBuildingPaused()) {
+    return {
+      ok: false,
+      error: "Live creation is temporarily paused.",
+    };
+  }
   const parsed = CreateLiveRoomInputZ.safeParse(input);
   if (!parsed.success) {
     return { ok: false, error: parsed.error.issues[0]?.message ?? "Invalid input." };
@@ -241,6 +247,9 @@ export async function inviteCoHost(
   | { ok: true; livekitToken: string; livekitUrl: string }
   | ActionError
 > {
+  if (liveBuildingPaused()) {
+    return { ok: false, error: "Live co-host invites are temporarily paused." };
+  }
   const parsed = InviteCoHostInputZ.safeParse(input);
   if (!parsed.success) {
     return { ok: false, error: parsed.error.issues[0]?.message ?? "Invalid input." };

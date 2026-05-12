@@ -26,6 +26,7 @@
 - `Overview` (`/studio`)
 - `Upload` (`/studio/upload`)
 - `Videos` (`/studio/videos`)
+- `Video detail` (`/studio/videos/[videoId]`)
 - `Live` (`/studio/live`)
 - `Settings` (`/studio/settings`)
 - `Analytics` (`/studio/analytics`)

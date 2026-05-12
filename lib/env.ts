@@ -91,3 +91,14 @@ export function studioGuestModeEnabled(): boolean {
   return process.env.NODE_ENV !== "production";
 }
 
+/**
+ * Temporary kill-switch to pause creation/start of new live rooms while
+ * retaining visibility and end controls for existing rooms.
+ */
+export function liveBuildingPaused(): boolean {
+  const raw = process.env.NEXT_PUBLIC_LIVE_BUILD_PAUSED?.toLowerCase().trim();
+  if (raw === "1" || raw === "true") return true;
+  if (raw === "0" || raw === "false") return false;
+  return true;
+}
+

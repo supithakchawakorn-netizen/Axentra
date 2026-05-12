@@ -135,7 +135,7 @@ export function UploadForm() {
           fileToUpload: file,
         });
         setStatus({ tag: "uploading", pct: 100 });
-        await new Promise((resolve) => setTimeout(resolve, 400));
+        await new Promise((resolve) => setTimeout(resolve, 500));
         setStatus({ tag: "done", videoId: fallback.videoId });
         router.push("/studio/videos");
         return;
@@ -176,7 +176,7 @@ export function UploadForm() {
       await insertTopicTags(inserted.id);
 
       setStatus({ tag: "uploading", pct: 100 });
-      await new Promise((resolve) => setTimeout(resolve, 400));
+      await new Promise((resolve) => setTimeout(resolve, 500));
       setStatus({ tag: "done", videoId: inserted.id });
       router.push("/studio/videos");
     } catch (err) {
