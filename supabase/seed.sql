@@ -1,3 +1,30 @@
+-- Create public videos bucket if not exists
+insert into storage.buckets (id, name, public)
+values ('videos', 'videos', true)
+on conflict (id) do nothing;
+
+-- Allow authenticated users to upload to their own folder
+do $$
+begin
+  create policy "Authenticated upload" on storage.objects
+    for insert to authenticated
+    with check (bucket_id = 'videos' AND (storage.foldername(name))[1] = auth.uid()::text);
+exception
+  when duplicate_object then null;
+end
+$$;
+
+-- Allow public read
+do $$
+begin
+  create policy "Public read" on storage.objects
+    for select to public
+    using (bucket_id = 'videos');
+exception
+  when duplicate_object then null;
+end
+$$;
+
 -- supabase/seed.sql
 -- Curated ticker seed (~180 rows). The roadmap (M3) calls for ~700–1000
 -- tickers. This file is the curated short list covering S&P 500 mega-caps,

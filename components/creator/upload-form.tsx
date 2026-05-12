@@ -58,40 +58,44 @@ export function UploadForm() {
     }
 
     try {
-      const extension = file.name.split(".").pop()?.toLowerCase() || "mp4";
-      const objectPath = `${user.id}/${crypto.randomUUID()}.${extension}`;
-
-      const { error: storageError } = await supabase
-        .storage
-        .from("videos")
-        .upload(objectPath, file, {
-          cacheControl: "3600",
-          upsert: false,
-        });
-      if (storageError) {
-        console.error("[upload-form] storage upload error", storageError);
-        setStatus({ tag: "error", message: storageError.message });
+      const uploadUrlResponse = await fetch("/api/mux/upload-url", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ visibility }),
+      });
+      const uploadUrlPayload = (await uploadUrlResponse.json()) as
+        | { uploadId: string; url: string }
+        | { error: string };
+      if (!uploadUrlResponse.ok || !("uploadId" in uploadUrlPayload) || !("url" in uploadUrlPayload)) {
+        const message =
+          ("error" in uploadUrlPayload && uploadUrlPayload.error) ||
+          "Could not create Mux upload URL.";
+        setStatus({ tag: "error", message });
         return;
       }
 
-      const { data: publicUrlData } = supabase.storage.from("videos").getPublicUrl(objectPath);
-      const publicUrl = publicUrlData.publicUrl;
-      setStatus({ tag: "uploading", pct: 75 });
+      setStatus({ tag: "uploading", pct: 35 });
 
-      // Env audit breadcrumb for local debugging.
-      console.log("[upload-form] Supabase env check", {
-        hasSupabaseClient: Boolean(supabase),
+      const uploadResponse = await fetch(uploadUrlPayload.url, {
+        method: "PUT",
+        body: file,
+        headers: { "Content-Type": file.type || "application/octet-stream" },
       });
+      if (!uploadResponse.ok) {
+        setStatus({ tag: "error", message: "Upload to Mux failed." });
+        return;
+      }
 
+      setStatus({ tag: "uploading", pct: 75 });
       const { data: inserted, error: insertError } = await supabase
         .from("videos")
         .insert({
           creator_id: user.id,
           title,
-          description: description || `Uploaded file: ${publicUrl}`,
+          description: description || "",
           visibility,
-          status: "ready",
-          mux_upload_id: objectPath,
+          status: "processing",
+          mux_upload_id: uploadUrlPayload.uploadId,
           thumbnail_url: null,
         })
         .select("id")
@@ -113,6 +117,8 @@ export function UploadForm() {
         }
       }
 
+      setStatus({ tag: "uploading", pct: 100 });
+      await new Promise((resolve) => setTimeout(resolve, 400));
       setStatus({ tag: "done", videoId: inserted.id });
       router.push("/studio/videos");
     } catch (err) {

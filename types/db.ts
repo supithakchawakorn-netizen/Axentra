@@ -392,8 +392,10 @@ export type Database = {
           mux_asset_id: string | null
           mux_playback_id: string | null
           mux_upload_id: string | null
+          playback_url: string | null
           published_at: string | null
           status: Database["public"]["Enums"]["video_status"]
+          storage_path: string | null
           thumbnail_url: string | null
           title: string
           updated_at: string
@@ -408,8 +410,10 @@ export type Database = {
           mux_asset_id?: string | null
           mux_playback_id?: string | null
           mux_upload_id?: string | null
+          playback_url?: string | null
           published_at?: string | null
           status?: Database["public"]["Enums"]["video_status"]
+          storage_path?: string | null
           thumbnail_url?: string | null
           title: string
           updated_at?: string
@@ -424,8 +428,10 @@ export type Database = {
           mux_asset_id?: string | null
           mux_playback_id?: string | null
           mux_upload_id?: string | null
+          playback_url?: string | null
           published_at?: string | null
           status?: Database["public"]["Enums"]["video_status"]
+          storage_path?: string | null
           thumbnail_url?: string | null
           title?: string
           updated_at?: string

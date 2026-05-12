@@ -40,5 +40,6 @@
 ## Migration notes
 
 - `0006_social_community_pivot.sql` introduces community/reputation tables.
+- `0007_add_playback_url.sql` adds `videos.playback_url` and `videos.storage_path` for storage-backed playback fallback.
 - Existing ticker join tables remain as a compatibility layer during topic-tag transition.
 

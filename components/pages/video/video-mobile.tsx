@@ -38,9 +38,10 @@ export function VideoMobile({
           Demo mode: this is sample video content.
         </div>
       ) : null}
-      {video.mux_playback_id ? (
+      {video.mux_playback_id || video.playback_url ? (
         <VideoPlayer
           playbackId={video.mux_playback_id}
+          playbackUrl={video.playback_url}
           title={video.title}
           videoId={video.id}
           poster={video.thumbnail_url ?? undefined}
@@ -54,7 +55,7 @@ export function VideoMobile({
       ) : (
         <div className="bg-muted flex aspect-video items-center justify-center rounded-xl border">
           <p className="text-muted-foreground text-sm">
-            Demo video preview. Connect Mux assets to enable playback.
+            Video not available yet.
           </p>
         </div>
       )}
