@@ -2,10 +2,18 @@ import { spawnSync } from "node:child_process";
 import { writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 
-const generated = spawnSync("supabase", ["gen", "types", "typescript", "--linked"], {
+const baseArgs = ["gen", "types", "typescript"];
+const localFirst = spawnSync("supabase", [...baseArgs, "--local"], {
   encoding: "utf8",
   shell: process.platform === "win32",
 });
+const generated =
+  localFirst.status === 0
+    ? localFirst
+    : spawnSync("supabase", [...baseArgs, "--linked"], {
+        encoding: "utf8",
+        shell: process.platform === "win32",
+      });
 
 if (generated.status !== 0) {
   if (generated.stdout) process.stdout.write(generated.stdout);

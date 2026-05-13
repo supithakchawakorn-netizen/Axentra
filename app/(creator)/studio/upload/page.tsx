@@ -46,7 +46,7 @@ export default async function UploadPage() {
           Guest mode: upload flow runs in simulation mode and will forward you to videos after submit.
         </section>
       ) : null}
-      <UploadForm />
+      <UploadForm allowGuestMode={previewMode} />
     </div>
   );
 }

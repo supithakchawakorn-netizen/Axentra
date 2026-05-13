@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createClient } from "@/lib/supabase/client";
-import { studioGuestModeEnabled } from "@/lib/env";
+import { createVideoUpload } from "@/app/(creator)/studio/upload/_actions";
 import { TickerPicker } from "@/components/creator/ticker-picker";
 import type { TickerRow } from "@/lib/data/tickers";
 
@@ -17,7 +17,7 @@ type Status =
   | { tag: "done"; videoId: string }
   | { tag: "error"; message: string };
 
-export function UploadForm() {
+export function UploadForm({ allowGuestMode = false }: { allowGuestMode?: boolean }) {
   const router = useRouter();
   const supabase = createClient();
   const [status, setStatus] = useState<Status>({ tag: "idle" });
@@ -33,7 +33,7 @@ export function UploadForm() {
       error,
     } = await supabase.auth.getUser();
     if (user && !error) return user;
-    if (!studioGuestModeEnabled()) return null;
+    if (!allowGuestMode) return null;
 
     const displayName = `Guest ${Math.random().toString(36).slice(2, 8)}`;
     const { data, error: signInError } = await supabase.auth.signInAnonymously({
@@ -46,18 +46,6 @@ export function UploadForm() {
       return null;
     }
     return data.user;
-  }
-
-  async function insertTopicTags(videoId: string) {
-    if (tickers.length === 0) return;
-    const rows = tickers.map((topic) => ({
-      video_id: videoId,
-      ticker_id: topic.id,
-    }));
-    const { error: tagError } = await supabase.from("video_tickers").insert(rows);
-    if (tagError) {
-      console.error("[upload-form] video_tickers insert error", tagError);
-    }
   }
 
   async function uploadViaSupabaseStorage(params: {
@@ -100,7 +88,6 @@ export function UploadForm() {
       throw new Error(insertError?.message || "Could not save video metadata.");
     }
 
-    await insertTopicTags(inserted.id);
     return { videoId: inserted.id };
   }
 
@@ -120,15 +107,17 @@ export function UploadForm() {
     }
 
     try {
-      const uploadUrlResponse = await fetch("/api/mux/upload-url", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ visibility }),
+      const uploadInit = await createVideoUpload({
+        title,
+        description,
+        visibility,
+        tickerIds: tickers.map((topic) => topic.id),
       });
-      const uploadUrlPayload = (await uploadUrlResponse.json()) as
-        | { uploadId: string; url: string }
-        | { error: string };
-      if (!uploadUrlResponse.ok || !("uploadId" in uploadUrlPayload) || !("url" in uploadUrlPayload)) {
+      if (!uploadInit.ok) {
+        if (!allowGuestMode) {
+          setStatus({ tag: "error", message: uploadInit.error });
+          return;
+        }
         // Fallback for local launch testing when Mux keys are not configured.
         const fallback = await uploadViaSupabaseStorage({
           userId: user.id,
@@ -140,10 +129,15 @@ export function UploadForm() {
         router.push("/studio/videos");
         return;
       }
+      if (uploadInit.uploadUrl.startsWith("guest://")) {
+        setStatus({ tag: "done", videoId: uploadInit.videoId });
+        router.push("/studio/videos");
+        return;
+      }
 
       setStatus({ tag: "uploading", pct: 35 });
 
-      const uploadResponse = await fetch(uploadUrlPayload.url, {
+      const uploadResponse = await fetch(uploadInit.uploadUrl, {
         method: "PUT",
         body: file,
         headers: { "Content-Type": file.type || "application/octet-stream" },
@@ -153,31 +147,9 @@ export function UploadForm() {
         return;
       }
 
-      setStatus({ tag: "uploading", pct: 75 });
-      const { data: inserted, error: insertError } = await supabase
-        .from("videos")
-        .insert({
-          creator_id: user.id,
-          title,
-          description: description || "",
-          visibility,
-          status: "processing",
-          mux_upload_id: uploadUrlPayload.uploadId,
-          thumbnail_url: null,
-        })
-        .select("id")
-        .single();
-      if (insertError || !inserted) {
-        console.error("[upload-form] videos insert error", insertError);
-        setStatus({ tag: "error", message: insertError?.message || "Could not save video metadata." });
-        return;
-      }
-
-      await insertTopicTags(inserted.id);
-
       setStatus({ tag: "uploading", pct: 100 });
       await new Promise((resolve) => setTimeout(resolve, 500));
-      setStatus({ tag: "done", videoId: inserted.id });
+      setStatus({ tag: "done", videoId: uploadInit.videoId });
       router.push("/studio/videos");
     } catch (err) {
       const message = err instanceof Error ? err.message : "Upload failed.";

@@ -95,7 +95,8 @@ export async function createLiveRoom(
       .from("room_tickers")
       .insert(tagRows);
     if (tagErr) {
-      console.error("[createLiveRoom] ticker tag insert", tagErr.message);
+      await supabase.from("live_rooms").delete().eq("id", roomId).eq("creator_id", user.id);
+      return { ok: false, error: `Could not attach topics: ${tagErr.message}` };
     }
   }
 
@@ -213,6 +214,9 @@ export async function getCreatorPublishToken(
   };
   if (room.creator_id !== user.id) {
     return { ok: false, error: "Not your room." };
+  }
+  if (room.status !== "live") {
+    return { ok: false, error: "Room is not live." };
   }
 
   const { data: profileRow } = await supabase

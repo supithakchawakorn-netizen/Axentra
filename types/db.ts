@@ -7,11 +7,6 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instantiate createClient with right options
-  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
-  __InternalSupabase: {
-    PostgrestVersion: "14.5"
-  }
   graphql_public: {
     Tables: {
       [_ in never]: never
@@ -77,6 +72,97 @@ export type Database = {
           },
         ]
       }
+      community_comment_likes: {
+        Row: {
+          comment_id: string
+          created_at: string
+          user_id: string
+        }
+        Insert: {
+          comment_id: string
+          created_at?: string
+          user_id: string
+        }
+        Update: {
+          comment_id?: string
+          created_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_comment_likes_comment_id_fkey"
+            columns: ["comment_id"]
+            isOneToOne: false
+            referencedRelation: "community_comments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "community_comment_likes_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      community_comments: {
+        Row: {
+          author_id: string
+          body: string
+          created_at: string
+          id: string
+          like_count: number
+          parent_id: string | null
+          post_id: string
+          reply_count: number
+          updated_at: string
+        }
+        Insert: {
+          author_id: string
+          body: string
+          created_at?: string
+          id?: string
+          like_count?: number
+          parent_id?: string | null
+          post_id: string
+          reply_count?: number
+          updated_at?: string
+        }
+        Update: {
+          author_id?: string
+          body?: string
+          created_at?: string
+          id?: string
+          like_count?: number
+          parent_id?: string | null
+          post_id?: string
+          reply_count?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_comments_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "community_comments_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "community_comments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "community_comments_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "community_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       community_memberships: {
         Row: {
           community_id: string
@@ -113,33 +199,135 @@ export type Database = {
           },
         ]
       }
+      community_post_saves: {
+        Row: {
+          created_at: string
+          post_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          post_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          post_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_post_saves_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "community_posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "community_post_saves_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      community_post_votes: {
+        Row: {
+          created_at: string
+          post_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          post_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          post_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_post_votes_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "community_posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "community_post_votes_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       community_posts: {
         Row: {
           author_id: string
           body: string
+          category: string
+          comment_count: number
           community_id: string
+          cover_image_url: string | null
           created_at: string
+          excerpt: string
           id: string
+          is_announcement: boolean
+          is_pinned: boolean
+          published_at: string | null
+          save_count: number
+          status: string
+          tags: string[]
           title: string
           updated_at: string
+          upvote_count: number
+          view_count: number
         }
         Insert: {
           author_id: string
           body?: string
+          category?: string
+          comment_count?: number
           community_id: string
+          cover_image_url?: string | null
           created_at?: string
+          excerpt?: string
           id?: string
+          is_announcement?: boolean
+          is_pinned?: boolean
+          published_at?: string | null
+          save_count?: number
+          status?: string
+          tags?: string[]
           title: string
           updated_at?: string
+          upvote_count?: number
+          view_count?: number
         }
         Update: {
           author_id?: string
           body?: string
+          category?: string
+          comment_count?: number
           community_id?: string
+          cover_image_url?: string | null
           created_at?: string
+          excerpt?: string
           id?: string
+          is_announcement?: boolean
+          is_pinned?: boolean
+          published_at?: string | null
+          save_count?: number
+          status?: string
+          tags?: string[]
           title?: string
           updated_at?: string
+          upvote_count?: number
+          view_count?: number
         }
         Relationships: [
           {
@@ -154,6 +342,55 @@ export type Database = {
             columns: ["community_id"]
             isOneToOne: false
             referencedRelation: "communities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      community_reports: {
+        Row: {
+          comment_id: string | null
+          created_at: string
+          id: string
+          post_id: string | null
+          reason: string
+          reporter_id: string
+        }
+        Insert: {
+          comment_id?: string | null
+          created_at?: string
+          id?: string
+          post_id?: string | null
+          reason?: string
+          reporter_id: string
+        }
+        Update: {
+          comment_id?: string | null
+          created_at?: string
+          id?: string
+          post_id?: string | null
+          reason?: string
+          reporter_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_reports_comment_id_fkey"
+            columns: ["comment_id"]
+            isOneToOne: false
+            referencedRelation: "community_comments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "community_reports_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "community_posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "community_reports_reporter_id_fkey"
+            columns: ["reporter_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -250,6 +487,74 @@ export type Database = {
           {
             foreignKeyName: "live_rooms_recording_video_id_fkey"
             columns: ["recording_video_id"]
+            isOneToOne: false
+            referencedRelation: "videos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pack_posts: {
+        Row: {
+          body: string
+          created_at: string
+          creator_id: string
+          id: string
+          image_url: string | null
+          live_room_id: string | null
+          pinned: boolean
+          ticker_id: string | null
+          updated_at: string
+          video_id: string | null
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          creator_id: string
+          id?: string
+          image_url?: string | null
+          live_room_id?: string | null
+          pinned?: boolean
+          ticker_id?: string | null
+          updated_at?: string
+          video_id?: string | null
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          creator_id?: string
+          id?: string
+          image_url?: string | null
+          live_room_id?: string | null
+          pinned?: boolean
+          ticker_id?: string | null
+          updated_at?: string
+          video_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pack_posts_creator_id_fkey"
+            columns: ["creator_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pack_posts_live_room_id_fkey"
+            columns: ["live_room_id"]
+            isOneToOne: false
+            referencedRelation: "live_rooms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pack_posts_ticker_id_fkey"
+            columns: ["ticker_id"]
+            isOneToOne: false
+            referencedRelation: "tickers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pack_posts_video_id_fkey"
+            columns: ["video_id"]
             isOneToOne: false
             referencedRelation: "videos"
             referencedColumns: ["id"]
@@ -618,3 +923,4 @@ export const Constants = {
     },
   },
 } as const
+

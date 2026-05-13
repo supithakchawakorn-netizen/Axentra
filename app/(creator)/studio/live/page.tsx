@@ -78,7 +78,7 @@ export default async function StudioLivePage() {
             </CardContent>
           </Card>
         ) : null}
-        {!livePaused ? <CreateLiveForm /> : null}
+        {!livePaused ? <CreateLiveForm allowGuestMode={previewMode} livePaused={livePaused} /> : null}
       </section>
 
       <section className="space-y-6">

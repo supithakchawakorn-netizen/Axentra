@@ -9,9 +9,14 @@ import { createLiveRoom } from "@/app/(creator)/studio/live/_actions";
 import { TickerPicker } from "@/components/creator/ticker-picker";
 import type { TickerRow } from "@/lib/data/tickers";
 import { createClient } from "@/lib/supabase/client";
-import { liveBuildingPaused, studioGuestModeEnabled } from "@/lib/env";
 
-export function CreateLiveForm() {
+export function CreateLiveForm({
+  allowGuestMode = false,
+  livePaused = false,
+}: {
+  allowGuestMode?: boolean;
+  livePaused?: boolean;
+}) {
   const router = useRouter();
   const supabase = createClient();
   const [title, setTitle] = useState("");
@@ -19,7 +24,7 @@ export function CreateLiveForm() {
   const [tickers, setTickers] = useState<TickerRow[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
-  const paused = liveBuildingPaused();
+  const paused = livePaused;
 
   async function ensureStudioGuestUser() {
     const {
@@ -27,7 +32,7 @@ export function CreateLiveForm() {
       error: getUserError,
     } = await supabase.auth.getUser();
     if (user && !getUserError) return user;
-    if (!studioGuestModeEnabled()) return null;
+    if (!allowGuestMode) return null;
 
     const displayName = `Guest ${Math.random().toString(36).slice(2, 8)}`;
     const { data, error: signInError } = await supabase.auth.signInAnonymously({

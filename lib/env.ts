@@ -25,10 +25,13 @@ const publicSchema = z.object({
   NEXT_PUBLIC_POSTHOG_KEY: optionalStringFromEnv,
   NEXT_PUBLIC_POSTHOG_HOST: z.string().url().default("https://eu.i.posthog.com"),
   NEXT_PUBLIC_SENTRY_DSN: optionalStringFromEnv,
+  NEXT_PUBLIC_COMMUNITY_DEMO_POSTING: optionalStringFromEnv,
 });
 
 const serverSchema = z.object({
   SUPABASE_SERVICE_ROLE_KEY: z.string().optional(),
+  STUDIO_GUEST_MODE: optionalStringFromEnv,
+  LIVE_BUILD_PAUSED: optionalStringFromEnv,
   SENTRY_AUTH_TOKEN: z.string().optional(),
   SENTRY_ORG: z.string().optional(),
   SENTRY_PROJECT: z.string().optional(),
@@ -50,6 +53,7 @@ export function publicEnv(): PublicEnv {
     NEXT_PUBLIC_POSTHOG_KEY: process.env.NEXT_PUBLIC_POSTHOG_KEY,
     NEXT_PUBLIC_POSTHOG_HOST: process.env.NEXT_PUBLIC_POSTHOG_HOST,
     NEXT_PUBLIC_SENTRY_DSN: process.env.NEXT_PUBLIC_SENTRY_DSN,
+    NEXT_PUBLIC_COMMUNITY_DEMO_POSTING: process.env.NEXT_PUBLIC_COMMUNITY_DEMO_POSTING,
   });
   if (!parsed.success) {
     throw new Error(`Invalid public env: ${parsed.error.message}`);
@@ -62,6 +66,8 @@ export function serverEnv(): ServerEnv {
   if (_serverEnv) return _serverEnv;
   const parsed = serverSchema.safeParse({
     SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
+    STUDIO_GUEST_MODE: process.env.STUDIO_GUEST_MODE,
+    LIVE_BUILD_PAUSED: process.env.LIVE_BUILD_PAUSED,
     SENTRY_AUTH_TOKEN: process.env.SENTRY_AUTH_TOKEN,
     SENTRY_ORG: process.env.SENTRY_ORG,
     SENTRY_PROJECT: process.env.SENTRY_PROJECT,
@@ -85,10 +91,11 @@ export function supabaseConfigured(): boolean {
  * Defaults to enabled outside production.
  */
 export function studioGuestModeEnabled(): boolean {
-  const raw = process.env.NEXT_PUBLIC_STUDIO_GUEST_MODE?.toLowerCase().trim();
+  if (process.env.NODE_ENV === "production") return false;
+  const raw = serverEnv().STUDIO_GUEST_MODE?.toLowerCase().trim();
   if (raw === "1" || raw === "true") return true;
   if (raw === "0" || raw === "false") return false;
-  return process.env.NODE_ENV !== "production";
+  return false;
 }
 
 /**
@@ -96,9 +103,21 @@ export function studioGuestModeEnabled(): boolean {
  * retaining visibility and end controls for existing rooms.
  */
 export function liveBuildingPaused(): boolean {
-  const raw = process.env.NEXT_PUBLIC_LIVE_BUILD_PAUSED?.toLowerCase().trim();
+  const raw = serverEnv().LIVE_BUILD_PAUSED?.toLowerCase().trim();
   if (raw === "1" || raw === "true") return true;
   if (raw === "0" || raw === "false") return false;
-  return true;
+  return false;
+}
+
+/**
+ * Dev-only toggle to allow unsigned users to create demo community posts.
+ * Never enabled in production.
+ */
+export function communityDemoPostingEnabled(): boolean {
+  if (process.env.NODE_ENV === "production") return false;
+  const raw = process.env.NEXT_PUBLIC_COMMUNITY_DEMO_POSTING?.toLowerCase().trim();
+  if (raw === "1" || raw === "true") return true;
+  if (raw === "0" || raw === "false") return false;
+  return false;
 }
 

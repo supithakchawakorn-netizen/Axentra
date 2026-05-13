@@ -91,7 +91,8 @@ export async function createVideoUpload(
       .from("video_tickers")
       .insert(tickerRows);
     if (tagErr) {
-      console.error("[createVideoUpload] ticker tag insert", tagErr.message);
+      await supabase.from("videos").delete().eq("id", videoId).eq("creator_id", user.id);
+      return { ok: false, error: `Could not attach topics: ${tagErr.message}` };
     }
   }
 
