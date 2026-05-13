@@ -4,6 +4,7 @@ import { ViewerTokenRequestZ } from "@/types/live";
 import { getRoom } from "@/lib/data/live-rooms";
 import { mintViewerToken } from "@/lib/livekit";
 import { clientIpFrom, rateLimit } from "@/lib/utils/rate-limit";
+import { publicEnv } from "@/lib/env";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -18,6 +19,18 @@ export const dynamic = "force-dynamic";
  *   - returns 429 + Retry-After when bucket is empty
  */
 export async function POST(request: NextRequest) {
+  const requestUrl = new URL(request.url);
+  const origin = request.headers.get("origin");
+  if (origin) {
+    const allowed = new Set<string>([
+      requestUrl.origin,
+      publicEnv().NEXT_PUBLIC_SITE_URL,
+    ]);
+    if (!allowed.has(origin)) {
+      return NextResponse.json({ error: "Forbidden origin." }, { status: 403 });
+    }
+  }
+
   const ip = clientIpFrom(request.headers);
   const limit = rateLimit(`viewer-token:${ip}`, {
     capacity: 60,

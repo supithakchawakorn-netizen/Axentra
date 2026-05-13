@@ -222,12 +222,13 @@ export async function toggleCommunityUpvote(input: TogglePostReactionInput): Pro
   const { supabase, user } = await requireUser();
   if (!user) return { ok: false, error: "Not signed in." };
 
-  const { data: existing } = await supabase
+  const { data: existing, error: existingError } = await supabase
     .from("community_post_votes")
     .select("post_id")
     .eq("post_id", parsed.data.postId)
     .eq("user_id", user.id)
     .maybeSingle();
+  if (existingError) return { ok: false, error: existingError.message };
   const upvoted = !existing;
   if (existing) {
     const { error } = await supabase
@@ -270,12 +271,13 @@ export async function toggleCommunitySave(input: TogglePostReactionInput): Promi
   const { supabase, user } = await requireUser();
   if (!user) return { ok: false, error: "Not signed in." };
 
-  const { data: existing } = await supabase
+  const { data: existing, error: existingError } = await supabase
     .from("community_post_saves")
     .select("post_id")
     .eq("post_id", parsed.data.postId)
     .eq("user_id", user.id)
     .maybeSingle();
+  if (existingError) return { ok: false, error: existingError.message };
   const saved = !existing;
   if (existing) {
     const { error } = await supabase
@@ -323,11 +325,12 @@ export async function addCommunityComment(input: AddCommunityCommentInput): Prom
     if (!isUuidId(parsed.data.parentId)) {
       return { ok: false, error: "Invalid parent comment id." };
     }
-    const { data: parent } = await supabase
+    const { data: parent, error: parentError } = await supabase
       .from("community_comments")
       .select("parent_id")
       .eq("id", parsed.data.parentId)
       .maybeSingle();
+    if (parentError) return { ok: false, error: parentError.message };
     if (!parent) return { ok: false, error: "Reply target not found." };
     if (parent.parent_id) return { ok: false, error: "Only one reply level is supported." };
   }
@@ -360,12 +363,13 @@ export async function toggleCommunityCommentLike(input: ToggleCommentLikeInput):
   const { supabase, user } = await requireUser();
   if (!user) return { ok: false, error: "Not signed in." };
 
-  const { data: existing } = await supabase
+  const { data: existing, error: existingError } = await supabase
     .from("community_comment_likes")
     .select("comment_id")
     .eq("comment_id", parsed.data.commentId)
     .eq("user_id", user.id)
     .maybeSingle();
+  if (existingError) return { ok: false, error: existingError.message };
   const liked = !existing;
   if (existing) {
     const { error } = await supabase

@@ -57,7 +57,11 @@ export function CreateLiveForm({
     startTransition(async () => {
       const user = await ensureStudioGuestUser();
       if (!user) {
-        setError("Unable to start guest session. Check Supabase anonymous auth settings.");
+        setError(
+          allowGuestMode
+            ? "Unable to start guest session. Check Supabase anonymous auth settings."
+            : "You must sign in to start a live room.",
+        );
         return;
       }
       const res = await createLiveRoom({

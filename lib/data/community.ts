@@ -668,18 +668,10 @@ export async function listCommunitiesForPicker(): Promise<Array<{ id: string; na
     .limit(30);
   if (error) {
     console.error("[listCommunitiesForPicker]", error.message);
-    return [
-      { id: "demo-community-1", name: "Creator Lab", slug: "creator-lab" },
-      { id: "demo-community-2", name: "Live Practitioners", slug: "live-practitioners" },
-    ];
+    return [];
   }
   const rows = (data ?? []) as Array<{ id: string; name: string; slug: string }>;
-  return rows.length > 0
-    ? rows
-    : [
-        { id: "demo-community-1", name: "Creator Lab", slug: "creator-lab" },
-        { id: "demo-community-2", name: "Live Practitioners", slug: "live-practitioners" },
-      ];
+  return rows;
 }
 
 export async function getCommunityPostForEdit(postId: string): Promise<{

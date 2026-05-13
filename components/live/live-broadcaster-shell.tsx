@@ -34,11 +34,17 @@ export function LiveBroadcasterShell({
   const router = useRouter();
   const [isEnded, setIsEnded] = useState(status === "ended");
   const [isPending, startTransition] = useTransition();
+  const [endError, setEndError] = useState<string | null>(null);
 
   function onEnd() {
     if (!confirm("End the stream? Recording will be processed and posted to your profile.")) return;
+    setEndError(null);
     startTransition(async () => {
-      await endLiveRoom({ roomId });
+      const result = await endLiveRoom({ roomId });
+      if (!result.ok) {
+        setEndError(result.error ?? "Could not end stream.");
+        return;
+      }
       setIsEnded(true);
       router.refresh();
     });
@@ -67,6 +73,9 @@ export function LiveBroadcasterShell({
           End stream
         </Button>
       </header>
+      {endError ? (
+        <p className="text-destructive text-sm">{endError}</p>
+      ) : null}
       <div className="border-border overflow-hidden rounded-lg border bg-black" style={{ height: "min(70vh, 540px)" }}>
         <LiveKitRoom
           token={livekitToken}
