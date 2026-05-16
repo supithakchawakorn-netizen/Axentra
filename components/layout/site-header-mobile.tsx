@@ -4,13 +4,13 @@ import { ViewModeToggle } from "@/components/layout/view-mode-toggle";
 import { DisplayDensityToggle } from "@/components/layout/display-density-toggle";
 import { WolfpackLogoMark } from "@/components/layout/wolfpack-logo-mark";
 
-export function SiteHeaderMobile() {
+export function SiteHeaderMobile({ isSignedIn }: { isSignedIn: boolean }) {
   return (
     <div className="flex h-14 w-full items-center gap-2 px-3 sm:hidden">
       <Link href="/" aria-label="Home" className="inline-flex">
         <WolfpackLogoMark className="size-8 rounded-lg" />
       </Link>
-      <form action="/explore" method="get" className="flex w-full items-center">
+      <form action="/search" method="get" className="flex w-full items-center">
         <label htmlFor="mobile-search" className="sr-only">
           Search communities and videos
         </label>
@@ -33,13 +33,23 @@ export function SiteHeaderMobile() {
       >
         <Video className="size-4" />
       </Link>
-      <Link
-        href="/sign-in"
-        aria-label="Sign in"
-        className="inline-flex size-9 items-center justify-center rounded-md hover:bg-muted/50"
-      >
-        <User className="size-4" />
-      </Link>
+      {isSignedIn ? (
+        <Link
+          href="/studio/settings"
+          aria-label="Account settings"
+          className="inline-flex size-9 items-center justify-center rounded-md hover:bg-muted/50"
+        >
+          <User className="size-4" />
+        </Link>
+      ) : (
+        <Link
+          href="/sign-in"
+          aria-label="Sign in"
+          className="inline-flex size-9 items-center justify-center rounded-md hover:bg-muted/50"
+        >
+          <User className="size-4" />
+        </Link>
+      )}
     </div>
   );
 }

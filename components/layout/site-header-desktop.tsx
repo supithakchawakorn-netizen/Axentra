@@ -6,7 +6,13 @@ import { DisplayDensityToggle } from "@/components/layout/display-density-toggle
 import { ViewModeToggle } from "@/components/layout/view-mode-toggle";
 import { WolfpackLogoMark } from "@/components/layout/wolfpack-logo-mark";
 
-export function SiteHeaderDesktop() {
+export function SiteHeaderDesktop({
+  isSignedIn,
+  accountLabel,
+}: {
+  isSignedIn: boolean;
+  accountLabel: string | null;
+}) {
   return (
     <div className="mx-auto hidden h-14 w-full max-w-[1400px] items-center gap-3 px-4 sm:flex">
       <Link
@@ -18,7 +24,7 @@ export function SiteHeaderDesktop() {
       </Link>
 
       <form
-        action="/explore"
+        action="/search"
         method="get"
         className="mx-auto hidden w-full max-w-xl items-center md:flex"
       >
@@ -48,6 +54,9 @@ export function SiteHeaderDesktop() {
           <Link href="/explore">Explore</Link>
         </Button>
         <Button asChild size="sm" variant="ghost">
+          <Link href="/subscriptions">Subscriptions</Link>
+        </Button>
+        <Button asChild size="sm" variant="ghost">
           <Link href="/live">Live</Link>
         </Button>
         <ViewModeToggle />
@@ -57,12 +66,22 @@ export function SiteHeaderDesktop() {
             <Video className="size-4" />
           </Link>
         </Button>
-        <Button asChild size="sm" variant="ghost">
-          <Link href="/sign-in">Sign in</Link>
-        </Button>
-        <Button asChild size="sm">
-          <Link href="/sign-in?next=/studio">Start creating</Link>
-        </Button>
+        {isSignedIn ? (
+          <Button asChild size="sm" variant="ghost">
+            <Link href="/studio/settings" className="max-w-[180px] truncate">
+              {accountLabel ?? "Account"}
+            </Link>
+          </Button>
+        ) : (
+          <>
+            <Button asChild size="sm" variant="ghost">
+              <Link href="/sign-in">Sign in</Link>
+            </Button>
+            <Button asChild size="sm">
+              <Link href="/sign-in?next=/studio">Start creating</Link>
+            </Button>
+          </>
+        )}
       </div>
     </div>
   );

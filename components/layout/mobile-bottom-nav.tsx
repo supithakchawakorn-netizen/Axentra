@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Clapperboard, Compass, Home, Radio } from "lucide-react";
+import { Clapperboard, Compass, Home, Radio, Rss } from "lucide-react";
 
 const NAV_ITEMS = [
   { href: "/", label: "Home", icon: Home },
   { href: "/explore", label: "Explore", icon: Compass },
+  { href: "/subscriptions", label: "Subs", icon: Rss },
   { href: "/live", label: "Live", icon: Radio },
   { href: "/studio", label: "Studio", icon: Clapperboard },
 ];
@@ -24,7 +25,7 @@ export function MobileBottomNav() {
       className="bg-background/95 fixed inset-x-0 bottom-0 z-40 border-t backdrop-blur-xl lg:hidden"
       aria-label="Mobile navigation"
     >
-      <ul className="mx-auto grid h-16 max-w-[640px] grid-cols-4">
+      <ul className="mx-auto grid h-16 max-w-[640px] grid-cols-5">
         {NAV_ITEMS.map((item) => {
           const Icon = item.icon;
           const active = isActive(pathname, item.href);

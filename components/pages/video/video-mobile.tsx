@@ -4,12 +4,14 @@ import { VideoPlayer } from "@/components/video/video-player";
 import { formatDate } from "@/lib/utils/format";
 import { TickerChips } from "@/components/ticker/ticker-chips";
 import { VerifiedBrokerBadge } from "@/components/creator/verified-broker-badge";
-import { Share2, ThumbsUp } from "lucide-react";
 import { CommentsSection } from "@/components/shared/comments-section";
 import type { DemoComment } from "@/lib/data/comments";
 import { ContinueWatchingStrip } from "@/components/video/continue-watching-strip";
 import { ContentHelpfulnessVote } from "@/components/shared/content-helpfulness-vote";
 import { inferMarketCategoryFromSymbols } from "@/lib/utils/market-category";
+import { VideoReactions } from "@/components/video/video-reactions";
+import { VideoDescriptionPanel } from "@/components/video/video-description-panel";
+import { VideoPlatformActions } from "@/components/video/video-platform-actions";
 
 interface VideoMobileProps {
   video: PublicVideoDetail;
@@ -73,31 +75,21 @@ export function VideoMobile({
           ) : null}
           {video.published_at ? <span>· {formatDate(video.published_at)}</span> : null}
         </div>
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            className="bg-secondary hover:bg-accent inline-flex min-h-10 items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium"
-          >
-            <ThumbsUp className="size-3.5" />
-            Like
-          </button>
-          <button
-            type="button"
-            className="bg-secondary hover:bg-accent inline-flex min-h-10 items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium"
-          >
-            <Share2 className="size-3.5" />
-            Share
-          </button>
-        </div>
+        <VideoReactions
+          videoId={video.id}
+          initialLikes={Math.max(8, comments.length * 2 + 4)}
+          initialDislikes={Math.max(1, Math.floor(comments.length / 3))}
+        />
+        <VideoPlatformActions videoId={video.id} creatorId={video.creator?.id} />
         <TickerChips tickers={tickers} />
       </header>
 
       {video.description ? (
-        <section className="bg-muted/50 rounded-xl border p-4">
-          <p className="readable-copy text-muted-foreground whitespace-pre-wrap text-sm">
-            {video.description}
-          </p>
-        </section>
+        <VideoDescriptionPanel
+          description={video.description}
+          publishedAt={video.published_at}
+          commentCount={comments.length}
+        />
       ) : null}
 
       <ContentHelpfulnessVote

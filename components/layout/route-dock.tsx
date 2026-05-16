@@ -7,6 +7,9 @@ import { cn } from "@/lib/utils/cn";
 const ROUTES = [
   { href: "/", label: "Home" },
   { href: "/explore", label: "Explore" },
+  { href: "/subscriptions", label: "Subscriptions" },
+  { href: "/playlists", label: "Playlists" },
+  { href: "/feed/trending", label: "Trending" },
   { href: "/live", label: "Live" },
   { href: "/pricing", label: "Pricing" },
   { href: "/setup", label: "Setup" },
@@ -16,6 +19,9 @@ const ROUTES = [
 
 export function RouteDock() {
   const pathname = usePathname();
+  if (pathname === "/community" || pathname.startsWith("/community/")) {
+    return null;
+  }
 
   return (
     <nav aria-label="Quick route dock" className="overflow-x-auto">
