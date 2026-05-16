@@ -23,7 +23,7 @@ export default async function UploadPage() {
         title="Upload a video"
         description={
           previewMode
-            ? "Upload workflow preview mode. Sign in to start real Mux uploads."
+            ? "Guest mode enabled: uploads simulate success so you can test end-to-end UX."
             : "Files are uploaded directly to Mux. You'll see processing status on your videos page."
         }
         actions={
@@ -43,11 +43,10 @@ export default async function UploadPage() {
       ) : null}
       {previewMode ? (
         <section className="glass-panel rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-amber-100">
-          Guest preview mode: upload controls are intentionally disabled until you sign in.
+          Guest mode: upload flow runs in simulation mode and will forward you to videos after submit.
         </section>
-      ) : (
-        <UploadForm />
-      )}
+      ) : null}
+      <UploadForm allowGuestMode={previewMode} />
     </div>
   );
 }

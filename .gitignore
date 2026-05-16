@@ -28,6 +28,7 @@ Thumbs.db
 .idea
 .vscode/*
 !.vscode/extensions.json
+.claude/worktrees/
 
 # Sentry
 .sentryclirc

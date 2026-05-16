@@ -1,14 +1,30 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
+function normalizeNext(next: string | null): string {
+  if (!next) {
+    return "/";
+  }
+  let decoded = next;
+  try {
+    decoded = decodeURIComponent(next);
+  } catch {
+    return "/";
+  }
+  if (!decoded.startsWith("/") || decoded.startsWith("//") || decoded.includes("\\")) {
+    return "/";
+  }
+  return decoded;
+}
+
 /**
  * OAuth + magic-link callback. Exchanges the `code` query parameter for a
- * session, then redirects to `next` (defaults to /studio).
+ * session, then redirects to `next` (defaults to /).
  */
 export async function GET(request: NextRequest) {
   const url = new URL(request.url);
   const code = url.searchParams.get("code");
-  const next = url.searchParams.get("next") ?? "/studio";
+  const next = normalizeNext(url.searchParams.get("next"));
   const errorDescription = url.searchParams.get("error_description");
 
   if (errorDescription) {

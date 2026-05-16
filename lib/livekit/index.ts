@@ -104,7 +104,7 @@ export async function mintCreatorToken(params: {
 
 /**
  * Co-host publisher token. Created server-side from a one-time invite link.
- * Distinct identity (not the user's id since co-hosts may not have an Axentra
+ * Distinct identity (not the user's id since co-hosts may not have a Varg Packs
  * account in V1).
  */
 export async function mintCoHostToken(params: {

@@ -1,10 +1,10 @@
-# Axentra
+# Varg Packs
 
 Web-first market video and live platform. Watch market commentary on demand or live, follow creators who link their brokerage read-only for credibility, and read AI-generated summaries on ticker pages.
 
 V1 is **public-watch first**: anyone can watch videos and live rooms without an account. Creators sign in to upload, go live, and link a brokerage account read-only.
 
-> Heads up: Axentra **does not** execute trades, pool capital, or run a copy-trading product. See `docs/project/non-goals.md`.
+> Heads up: Varg Packs **does not** execute trades, pool capital, or run a copy-trading product. See `docs/project/non-goals.md`.
 
 ## Stack
 
@@ -25,14 +25,14 @@ V1 is **public-watch first**: anyone can watch videos and live rooms without an 
 ## Quick start
 
 ```bash
-# 1. install dependencies
-pnpm install
+# 1. enable package manager shim and install dependencies
+corepack pnpm install
 
 # 2. copy env template and fill in real values as services are provisioned
 cp .env.example .env.local
 
 # 3. boot the dev server
-pnpm dev
+corepack pnpm dev
 ```
 
 App runs at `http://localhost:3000`.
@@ -56,17 +56,21 @@ We don't run a local Supabase stack on this machine. Migrations push to a remote
 1. Create a Supabase project at <https://supabase.com/dashboard>.
 2. Copy `Project URL`, `anon public` key, and `service_role` key from **Project Settings → API** into `.env.local`.
 3. Install the Supabase CLI (Windows): `scoop install supabase` or download from <https://github.com/supabase/cli/releases>.
-4. Link this repo to your project:
+4. Authenticate CLI:
+   ```bash
+   supabase login
+   ```
+5. Link this repo to your project:
    ```bash
    supabase link --project-ref <your-project-ref>
    ```
-5. Push migrations:
+6. Push migrations:
    ```bash
-   pnpm db:migrate         # alias for: supabase db push
+   corepack pnpm db:migrate
    ```
-6. Generate typed schema:
+7. Generate typed schema:
    ```bash
-   pnpm db:types           # writes types/db.ts
+   corepack pnpm db:types
    ```
 
 `pnpm db:reset` is a stub for now (a local stack would let us reset on demand). Re-enable once we add Docker/Supabase CLI local dev.
@@ -75,16 +79,17 @@ We don't run a local Supabase stack on this machine. Migrations push to a remote
 
 | Command | What it does |
 |---|---|
-| `pnpm dev` | Next.js dev server. |
-| `pnpm build` | Production build. |
-| `pnpm start` | Run the production build. |
-| `pnpm lint` | ESLint (Next.js + TS rules). |
-| `pnpm typecheck` | `tsc --noEmit`. |
-| `pnpm test` | Vitest unit tests. |
-| `pnpm format` | Prettier write. |
-| `pnpm check` | `lint && typecheck && test && build` (local CI gate). |
-| `pnpm db:migrate` | Push migrations to remote Supabase. |
-| `pnpm db:types` | Regenerate `types/db.ts` from the linked project. |
+| `corepack pnpm dev` | Next.js dev server. |
+| `corepack pnpm build` | Production build. |
+| `corepack pnpm start` | Run the production build. |
+| `corepack pnpm lint` | ESLint (Next.js + TS rules). |
+| `corepack pnpm typecheck` | `tsc --noEmit`. |
+| `corepack pnpm test` | Vitest unit tests. |
+| `corepack pnpm preflight` | Verify local prerequisites (CLI, Supabase login/link). |
+| `corepack pnpm format` | Prettier write. |
+| `corepack pnpm check` | `lint && typecheck && test && build` (local CI gate). |
+| `corepack pnpm db:migrate` | Push migrations to remote Supabase. |
+| `corepack pnpm db:types` | Regenerate `types/db.ts` from the linked project safely. |
 
 CI on GitHub is intentionally not wired yet (per plan, local git only for now). When a remote is added we'll add `.github/workflows/ci.yml`.
 

@@ -1,146 +1,92 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { X } from "lucide-react";
-import {
-  searchTickersAction,
-  hydrateTickersAction,
-} from "@/app/(creator)/studio/_actions/tickers";
+import { useEffect, useMemo, useState } from "react";
 import type { TickerRow } from "@/lib/data/tickers";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { cn } from "@/lib/utils/cn";
 
-interface Props {
-  value: TickerRow[];
-  onChange: (next: TickerRow[]) => void;
-  initialIds?: string[];
-  max?: number;
-  disabled?: boolean;
-  label?: string;
-  hint?: string;
-}
+const TOPIC_OPTIONS: TickerRow[] = [
+  { id: "11111111-1111-4111-8111-111111111111", symbol: "BUILD", name: "Builders", exchange: null, country: null },
+  { id: "22222222-2222-4222-8222-222222222222", symbol: "CREATE", name: "Creators", exchange: null, country: null },
+  { id: "33333333-3333-4333-8333-333333333333", symbol: "GROW", name: "Growth", exchange: null, country: null },
+  { id: "44444444-4444-4444-8444-444444444444", symbol: "COMM", name: "Community", exchange: null, country: null },
+  { id: "55555555-5555-4555-8555-555555555555", symbol: "LEARN", name: "Learning", exchange: null, country: null },
+];
 
 export function TickerPicker({
   value,
   onChange,
-  initialIds,
-  max = 8,
-  disabled,
-  label = "Tickers",
-  hint = "Tag up to 8 tickers covered in this content.",
-}: Props) {
-  const [q, setQ] = useState("");
-  const [results, setResults] = useState<TickerRow[]>([]);
-  const [open, setOpen] = useState(false);
-  const lastQuery = useRef("");
+  initialIds = [],
+  disabled = false,
+}: {
+  value: TickerRow[];
+  onChange: (items: TickerRow[]) => void;
+  initialIds?: string[];
+  disabled?: boolean;
+}) {
+  const [query, setQuery] = useState("");
 
   useEffect(() => {
-    if (!initialIds || initialIds.length === 0) return;
-    if (value.length > 0) return;
-    let cancelled = false;
-    void hydrateTickersAction({ ids: initialIds }).then((res) => {
-      if (cancelled) return;
-      if (res.ok) onChange(res.results);
-    });
-    return () => {
-      cancelled = true;
-    };
+    if (value.length > 0 || initialIds.length === 0) return;
+    const mapped = TOPIC_OPTIONS.filter((topic) => initialIds.includes(topic.id));
+    if (mapped.length > 0) onChange(mapped);
   }, [initialIds, onChange, value.length]);
 
-  useEffect(() => {
-    if (!open) return;
-    if (q.trim().length === 0) {
-      return;
-    }
-    const queryAt = q;
-    lastQuery.current = queryAt;
-    const t = setTimeout(async () => {
-      const res = await searchTickersAction({ q: queryAt, limit: 8 });
-      if (lastQuery.current !== queryAt) return;
-      if (res.ok) {
-        const filtered = res.results.filter(
-          (r) => !value.some((v) => v.id === r.id),
-        );
-        setResults(filtered);
-      } else {
-        setResults([]);
-      }
-    }, 150);
-    return () => clearTimeout(t);
-  }, [q, open, value]);
+  const options = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return TOPIC_OPTIONS.filter((topic) =>
+      !q ? true : topic.name.toLowerCase().includes(q) || topic.symbol.toLowerCase().includes(q),
+    );
+  }, [query]);
 
-  const visibleResults = q.trim().length > 0 ? results : [];
-
-  const atMax = value.length >= max;
-
-  function add(t: TickerRow) {
-    if (atMax) return;
-    onChange([...value, t]);
-    setQ("");
-    setResults([]);
+  function add(topic: TickerRow) {
+    if (value.some((item) => item.id === topic.id)) return;
+    onChange([...value, topic]);
   }
+
   function remove(id: string) {
-    onChange(value.filter((t) => t.id !== id));
+    onChange(value.filter((item) => item.id !== id));
   }
 
   return (
-    <div className="space-y-1.5">
-      <Label htmlFor="ticker-search">{label}</Label>
-      <div className="relative">
-        <Input
-          id="ticker-search"
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          onFocus={() => setOpen(true)}
-          onBlur={() => setTimeout(() => setOpen(false), 120)}
-          placeholder={atMax ? `Up to ${max} tickers` : "Search e.g. AAPL, NVDA"}
-          disabled={disabled || atMax}
-          autoComplete="off"
-        />
-        {open && visibleResults.length > 0 ? (
-          <div className="bg-popover absolute z-10 mt-1 w-full overflow-hidden rounded-md border shadow-md">
-            {visibleResults.map((r) => (
-              <button
-                key={r.id}
-                type="button"
-                onMouseDown={(e) => e.preventDefault()}
-                onClick={() => add(r)}
-                className={cn(
-                  "hover:bg-accent flex w-full items-center justify-between px-3 py-2 text-left text-sm",
-                )}
-              >
-                <span className="font-medium">{r.symbol}</span>
-                <span className="text-muted-foreground ml-3 truncate text-xs">
-                  {r.name}
-                </span>
-              </button>
-            ))}
-          </div>
-        ) : null}
-      </div>
-      {value.length > 0 ? (
-        <div className="flex flex-wrap gap-1.5 pt-1">
-          {value.map((t) => (
-            <span
-              key={t.id}
-              className="bg-secondary text-secondary-foreground inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs"
+    <div className="space-y-2">
+      <label className="text-sm font-medium">Topics</label>
+      <input
+        value={query}
+        onChange={(event) => setQuery(event.target.value)}
+        disabled={disabled}
+        placeholder="Search topics"
+        className="border-input focus-visible:border-ring focus-visible:ring-ring/50 dark:bg-input/30 placeholder:text-muted-foreground h-9 w-full rounded-md border bg-transparent px-3 text-sm shadow-xs outline-none focus-visible:ring-[3px] disabled:opacity-50"
+      />
+      <ul className="flex flex-wrap gap-2">
+        {options.map((topic) => (
+          <li key={topic.id}>
+            <button
+              type="button"
+              disabled={disabled}
+              onClick={() => add(topic)}
+              className="bg-secondary text-secondary-foreground hover:bg-accent rounded-full px-3 py-1 text-xs disabled:opacity-50"
             >
-              {t.symbol}
+              {topic.name}
+            </button>
+          </li>
+        ))}
+      </ul>
+      {value.length > 0 ? (
+        <ul className="flex flex-wrap gap-2">
+          {value.map((topic) => (
+            <li key={topic.id}>
               <button
                 type="button"
-                onClick={() => remove(t.id)}
                 disabled={disabled}
-                className="hover:text-foreground -mr-0.5 inline-flex items-center"
-                aria-label={`Remove ${t.symbol}`}
+                onClick={() => remove(topic.id)}
+                className="rounded-full border px-3 py-1 text-xs"
               >
-                <X className="h-3 w-3" />
+                {topic.name} ×
               </button>
-            </span>
+            </li>
           ))}
-        </div>
+        </ul>
       ) : null}
-      <p className="text-muted-foreground text-xs">{hint}</p>
     </div>
   );
 }
+

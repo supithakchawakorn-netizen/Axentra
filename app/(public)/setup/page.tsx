@@ -8,7 +8,7 @@ import { getIntegrationChecklist } from "@/lib/setup/integrations";
 
 export const metadata = {
   title: "Setup assistant",
-  description: "Connect external services to switch from Demo Mode to real data.",
+  description: "Connect core services to switch from demo mode to live community operations.",
 };
 
 export default function SetupPage() {
@@ -23,7 +23,7 @@ export default function SetupPage() {
     <main className="mx-auto w-full max-w-5xl space-y-6 px-2 py-6">
       <PageHeader
         title="Setup assistant"
-        description="Follow this checklist to move from Demo Mode to fully live integrations."
+        description="Follow this checklist to move from demo mode to fully live community integrations."
       />
 
       <section className="glass-panel rounded-xl border p-4 space-y-2">
@@ -150,7 +150,7 @@ export default function SetupPage() {
                   rel="noreferrer"
                   className="bg-secondary hover:bg-accent rounded-full px-3 py-1.5"
                 >
-                  Open Axentra runbook
+                  Open Varg Packs runbook
                 </a>
               ) : null}
               {item.install ? (
@@ -179,7 +179,6 @@ const INTERNAL_RUNBOOKS: Record<string, string> = {
   mux: "https://docs.mux.com/guides/video/get-started-with-mux-video",
   livekit: "https://docs.livekit.io/home/quickstarts/nextjs/",
   openai: "https://platform.openai.com/docs/quickstart",
-  market_data: "https://polygon.io/docs/stocks/getting-started",
   posthog: "https://posthog.com/docs/libraries/next-js",
   sentry: "https://docs.sentry.io/platforms/javascript/guides/nextjs/",
   resend: "https://resend.com/docs/send-with-nextjs",
@@ -212,19 +211,8 @@ function getRecommendedNextAction(
     };
   }
 
-  const marketData = checklist.find((item) => item.id === "market_data");
-  if (marketData && !marketData.configured) {
-    return {
-      title: "Activate realtime market provider",
-      description:
-        "Set provider mode and API credentials to replace the demo tape with live exchange data.",
-      keyHint: "NEXT_PUBLIC_MARKET_DATA_MODE=provider",
-      href: marketData.docsUrl,
-    };
-  }
-
   const partial = checklist.find(
-    (item) => item.id !== "market_data" && item.partial && !item.configured,
+    (item) => item.partial && !item.configured,
   );
   if (partial) {
     return {

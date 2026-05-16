@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" viewBox="0 0 192 192" fill="none">
+  <defs>
+    <clipPath id="rounded">
+      <rect width="192" height="192" rx="28" />
+    </clipPath>
+  </defs>
+  <g clip-path="url(#rounded)">
+    <rect width="192" height="192" fill="#0A0A0A" />
+    <image
+      href="/brand/vargpack-mockup-full.png"
+      x="-408"
+      y="-82"
+      width="1024"
+      height="1024"
+      preserveAspectRatio="xMinYMin slice"
+    />
+  </g>
+</svg>

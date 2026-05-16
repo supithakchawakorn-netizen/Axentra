@@ -14,7 +14,7 @@ export const DEMO_VIDEOS = [
   {
     id: "demo-video-1",
     title: "Pre-market setup: SPY and QQQ game plan",
-    description: "A sample Axentra video for UI preview and feed testing.",
+    description: "A sample Varg Packs video for UI preview and feed testing.",
     duration_seconds: 742,
     thumbnail_url: "https://images.unsplash.com/photo-1642543348745-5c4a9e4c2f8d?auto=format&fit=crop&w=1280&q=80",
     mux_playback_id: null,

@@ -89,11 +89,15 @@ export async function POST(request: NextRequest) {
       const update: {
         status: "ready";
         mux_playback_id: string | null;
+        playback_url: string | null;
         duration_seconds: number | null;
         thumbnail_url: string | null;
       } = {
         status: "ready",
         mux_playback_id: playbackId,
+        playback_url: playbackId
+          ? `https://stream.mux.com/${playbackId}.m3u8`
+          : null,
         duration_seconds: data.duration ? Math.round(data.duration) : null,
         thumbnail_url: playbackId
           ? `https://image.mux.com/${playbackId}/thumbnail.jpg?width=1280&height=720&fit_mode=smartcrop`

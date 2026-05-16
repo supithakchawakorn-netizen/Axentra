@@ -1,11 +1,19 @@
 "use client";
 
-export default function LiveError() {
+import { RouteErrorState } from "@/components/shared/route-error-state";
+
+export default function LiveError({
+  error,
+  reset,
+}: {
+  error: Error;
+  reset: () => void;
+}) {
   return (
-    <main className="w-full px-2 py-6">
-      <p className="text-destructive text-sm">
-        Live directory failed to load. Please refresh and try again.
-      </p>
-    </main>
+    <RouteErrorState
+      error={error}
+      reset={reset}
+      title="Live directory failed to load."
+    />
   );
 }

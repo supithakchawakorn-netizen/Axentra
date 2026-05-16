@@ -8,19 +8,62 @@ import { Label } from "@/components/ui/label";
 import { createLiveRoom } from "@/app/(creator)/studio/live/_actions";
 import { TickerPicker } from "@/components/creator/ticker-picker";
 import type { TickerRow } from "@/lib/data/tickers";
+import { createClient } from "@/lib/supabase/client";
 
-export function CreateLiveForm() {
+export function CreateLiveForm({
+  allowGuestMode = false,
+  livePaused = false,
+}: {
+  allowGuestMode?: boolean;
+  livePaused?: boolean;
+}) {
   const router = useRouter();
+  const supabase = createClient();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [tickers, setTickers] = useState<TickerRow[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+  const paused = livePaused;
+
+  async function ensureStudioGuestUser() {
+    const {
+      data: { user },
+      error: getUserError,
+    } = await supabase.auth.getUser();
+    if (user && !getUserError) return user;
+    if (!allowGuestMode) return null;
+
+    const displayName = `Guest ${Math.random().toString(36).slice(2, 8)}`;
+    const { data, error: signInError } = await supabase.auth.signInAnonymously({
+      options: {
+        data: { full_name: displayName },
+      },
+    });
+    if (signInError) {
+      console.error("[create-live-form] guest anonymous sign-in failed", signInError);
+      return null;
+    }
+    return data.user;
+  }
 
   function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (paused) {
+      setError("Live creation is temporarily paused.");
+      return;
+    }
     setError(null);
     startTransition(async () => {
+      const user = await ensureStudioGuestUser();
+      if (!user) {
+        setError(
+          allowGuestMode
+            ? "Unable to start guest session. Check Supabase anonymous auth settings."
+            : "You must sign in to start a live room.",
+        );
+        return;
+      }
       const res = await createLiveRoom({
         title,
         description,
@@ -39,8 +82,8 @@ export function CreateLiveForm() {
       <section className="glass-panel rounded-lg border p-4 space-y-1.5">
         <p className="text-sm font-medium">Time-to-go-live guide</p>
         <ul className="text-muted-foreground space-y-1 text-xs">
-          <li>1) Use a specific title (session + market context).</li>
-          <li>2) Tag relevant tickers so your room appears in ticker discovery.</li>
+          <li>1) Use a specific title for your community session.</li>
+          <li>2) Tag relevant topics so your room appears in discovery.</li>
           <li>3) Start stream only when your mic/camera setup is ready.</li>
         </ul>
       </section>
@@ -72,7 +115,7 @@ export function CreateLiveForm() {
       </div>
 
       <div className="space-y-3 rounded-lg border p-4">
-        <p className="text-sm font-medium">Related tickers</p>
+        <p className="text-sm font-medium">Related topics</p>
         <TickerPicker value={tickers} onChange={setTickers} disabled={isPending} />
       </div>
 
@@ -83,11 +126,13 @@ export function CreateLiveForm() {
       ) : null}
 
       <div className="flex flex-wrap items-center gap-3">
-        <Button type="submit" disabled={isPending}>
-          {isPending ? "Starting…" : "Start streaming"}
+        <Button type="submit" disabled={isPending || paused}>
+          {isPending ? "Starting…" : paused ? "Live paused" : "Start streaming"}
         </Button>
         <p className="text-muted-foreground text-xs">
-          You can end the room anytime from the broadcaster screen and keep a clean recording handoff.
+          {paused
+            ? "Live creation is paused for now. Existing live rooms can still be ended from Studio controls."
+            : "You can end the room anytime from the broadcaster screen and keep a clean recording handoff."}
         </p>
       </div>
     </form>

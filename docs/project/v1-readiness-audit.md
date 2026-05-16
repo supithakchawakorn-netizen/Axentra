@@ -1,6 +1,6 @@
 # V1 Readiness Audit
 
-This audit summarizes where the current Axentra codebase stands for shipping V1 and what still needs hardening.
+This audit summarizes where the current Varg Packs codebase stands for shipping V1 and what still needs hardening.
 
 ## Overall status
 
@@ -36,6 +36,11 @@ This audit summarizes where the current Axentra codebase stands for shipping V1 
    - Add alerting/monitoring runbook for failed cron/webhook events.
    - Add retry/backoff + idempotency notes for every external boundary.
    - Validate Vercel cron schedules are active and secret-protected in production.
+   - Use the runbooks in `docs/ops/`:
+     - `docs/ops/deploy-checklist.md`
+     - `docs/ops/cron-checks.md`
+     - `docs/ops/webhook-replay.md`
+     - `docs/ops/alert-ownership.md`
 
 ## Recommended gate to declare “launch-ready”
 

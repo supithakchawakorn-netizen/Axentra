@@ -13,6 +13,7 @@ import {
 import { mintCoHostToken, mintCreatorToken } from "@/lib/livekit";
 import { captureServerEvent } from "@/lib/posthog/server";
 import { Events } from "@/lib/posthog/events";
+import { liveBuildingPaused, studioGuestModeEnabled } from "@/lib/env";
 
 export interface CreateRoomResult {
   ok: true;
@@ -30,6 +31,12 @@ export interface ActionError {
 export async function createLiveRoom(
   input: CreateLiveRoomInput,
 ): Promise<CreateRoomResult | ActionError> {
+  if (liveBuildingPaused()) {
+    return {
+      ok: false,
+      error: "Live creation is temporarily paused.",
+    };
+  }
   const parsed = CreateLiveRoomInputZ.safeParse(input);
   if (!parsed.success) {
     return { ok: false, error: parsed.error.issues[0]?.message ?? "Invalid input." };
@@ -39,7 +46,18 @@ export async function createLiveRoom(
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { ok: false, error: "Not signed in." };
+  if (!user) {
+    if (studioGuestModeEnabled()) {
+      return {
+        ok: true,
+        roomId: "demo-room-1",
+        livekitToken: "guest-preview-token",
+        livekitUrl: process.env.LIVEKIT_URL ?? "wss://guest-preview.invalid",
+        livekitRoomName: "guest-preview-room",
+      };
+    }
+    return { ok: false, error: "Not signed in." };
+  }
 
   const { data: profileRow } = await supabase
     .from("profiles")
@@ -77,7 +95,8 @@ export async function createLiveRoom(
       .from("room_tickers")
       .insert(tagRows);
     if (tagErr) {
-      console.error("[createLiveRoom] ticker tag insert", tagErr.message);
+      await supabase.from("live_rooms").delete().eq("id", roomId).eq("creator_id", user.id);
+      return { ok: false, error: `Could not attach topics: ${tagErr.message}` };
     }
   }
 
@@ -117,6 +136,9 @@ export async function createLiveRoom(
 export async function endLiveRoom(
   input: EndLiveRoomInput,
 ): Promise<{ ok: boolean; error?: string }> {
+  if (studioGuestModeEnabled()) {
+    return { ok: true };
+  }
   const parsed = EndLiveRoomInputZ.safeParse(input);
   if (!parsed.success) {
     return { ok: false, error: parsed.error.issues[0]?.message ?? "Invalid input." };
@@ -125,7 +147,10 @@ export async function endLiveRoom(
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { ok: false, error: "Not signed in." };
+  if (!user) {
+    if (studioGuestModeEnabled()) return { ok: true };
+    return { ok: false, error: "Not signed in." };
+  }
 
   const { error } = await supabase
     .from("live_rooms")
@@ -161,7 +186,18 @@ export async function getCreatorPublishToken(
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { ok: false, error: "Not signed in." };
+  if (!user) {
+    if (studioGuestModeEnabled()) {
+      return {
+        ok: true,
+        livekitToken: "guest-preview-token",
+        livekitUrl: process.env.LIVEKIT_URL ?? "wss://guest-preview.invalid",
+        livekitRoomName: "guest-preview-room",
+        status: "live",
+      };
+    }
+    return { ok: false, error: "Not signed in." };
+  }
 
   const { data: roomRow, error } = await supabase
     .from("live_rooms")
@@ -178,6 +214,9 @@ export async function getCreatorPublishToken(
   };
   if (room.creator_id !== user.id) {
     return { ok: false, error: "Not your room." };
+  }
+  if (room.status !== "live") {
+    return { ok: false, error: "Room is not live." };
   }
 
   const { data: profileRow } = await supabase
@@ -212,6 +251,9 @@ export async function inviteCoHost(
   | { ok: true; livekitToken: string; livekitUrl: string }
   | ActionError
 > {
+  if (liveBuildingPaused()) {
+    return { ok: false, error: "Live co-host invites are temporarily paused." };
+  }
   const parsed = InviteCoHostInputZ.safeParse(input);
   if (!parsed.success) {
     return { ok: false, error: parsed.error.issues[0]?.message ?? "Invalid input." };
@@ -220,7 +262,16 @@ export async function inviteCoHost(
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { ok: false, error: "Not signed in." };
+  if (!user) {
+    if (studioGuestModeEnabled()) {
+      return {
+        ok: true,
+        livekitToken: "guest-cohost-token",
+        livekitUrl: process.env.LIVEKIT_URL ?? "wss://guest-preview.invalid",
+      };
+    }
+    return { ok: false, error: "Not signed in." };
+  }
 
   const { data: roomRow, error } = await supabase
     .from("live_rooms")

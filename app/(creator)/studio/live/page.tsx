@@ -10,6 +10,8 @@ import { PageHeader } from "@/components/shared/page-header";
 import { SectionHeader } from "@/components/shared/section-header";
 import { EmptyState } from "@/components/shared/empty-state";
 import { StatusPill } from "@/components/shared/status-pill";
+import { LiveRoomCardActions } from "@/components/creator/live-room-card-actions";
+import { liveBuildingPaused } from "@/lib/env";
 
 export const dynamic = "force-dynamic";
 
@@ -18,7 +20,12 @@ export const metadata = {
 };
 
 export default async function StudioLivePage() {
-  const livekitWebhookConfigured = Boolean(process.env.LIVEKIT_WEBHOOK_SECRET);
+  const livePaused = liveBuildingPaused();
+  const livekitConfigured = Boolean(
+    process.env.LIVEKIT_API_KEY &&
+      process.env.LIVEKIT_API_SECRET &&
+      process.env.LIVEKIT_URL,
+  );
   const supabase = await createClient();
   const {
     data: { user },
@@ -36,7 +43,7 @@ export default async function StudioLivePage() {
       <section className="space-y-4">
         <PageHeader
           title="Go live"
-          description="Open a LiveKit room. Anonymous viewers join from /live. When you end a room, the recording lands as a video on your profile."
+          description="Create and control LiveKit rooms from Studio. Use Studio controls to manage active rooms and end streams cleanly."
           actions={
             <Link
               href="/live"
@@ -46,10 +53,16 @@ export default async function StudioLivePage() {
             </Link>
           }
         />
-        {!livekitWebhookConfigured ? (
+        {livePaused ? (
           <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-200">
-            LiveKit webhook secret is not set yet. Going live can work, but
-            webhook-driven room/recording sync will be limited until configured.
+            Live building is paused for now. You can still manage and end any active rooms.
+          </div>
+        ) : null}
+        {!livekitConfigured ? (
+          <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-200">
+            LiveKit API credentials are not fully set yet. Add LIVEKIT_API_KEY,
+            LIVEKIT_API_SECRET, and LIVEKIT_URL in .env.local, then restart dev
+            server.
           </div>
         ) : null}
         {previewMode ? (
@@ -57,16 +70,15 @@ export default async function StudioLivePage() {
             <CardHeader>
               <CardTitle className="text-base text-amber-100">Live control preview</CardTitle>
               <CardDescription className="text-amber-200/90">
-                Sign in to actually start broadcasting. This preview lets you inspect layout and creator controls.
+                Guest mode enabled. You can run live flow actions in preview mode.
               </CardDescription>
             </CardHeader>
             <CardContent className="text-xs text-amber-100/90">
-              Use this mode to validate UX flow, then authenticate when you are ready for real LiveKit rooms.
+              Actions run with simulated backend responses unless you sign in.
             </CardContent>
           </Card>
-        ) : (
-          <CreateLiveForm />
-        )}
+        ) : null}
+        {!livePaused ? <CreateLiveForm allowGuestMode={previewMode} livePaused={livePaused} /> : null}
       </section>
 
       <section className="space-y-6">
@@ -92,12 +104,7 @@ export default async function StudioLivePage() {
                       </CardDescription>
                     </CardHeader>
                     <CardContent>
-                      <Link
-                        href={`/room/${r.id}`}
-                        className="text-primary text-sm hover:underline underline-offset-4"
-                      >
-                        Open room →
-                      </Link>
+                      <LiveRoomCardActions roomId={r.id} roomTitle={r.title} />
                     </CardContent>
                   </Card>
                 </li>

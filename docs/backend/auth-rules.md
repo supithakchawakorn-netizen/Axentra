@@ -19,11 +19,11 @@ No password sign-in in V1.
 - `lib/supabase/client.ts` — browser client. Cookies via `@supabase/ssr`.
 - `lib/supabase/server.ts` — Server Component / Server Action client. Reads cookies; **respects RLS**.
 - `lib/supabase/admin.ts` — service-role client. **Only** import in `app/api/webhooks/*`, `app/api/cron/*`, and trusted server scripts.
-- `lib/supabase/middleware.ts` — refreshes session cookies in `middleware.ts`.
+- `lib/supabase/middleware.ts` — refreshes session cookies in `proxy.ts`.
 
-## Middleware
+## Proxy
 
-`middleware.ts`:
+`proxy.ts`:
 
 - Matches `/studio/:path*` and `/auth/callback`.
 - Refreshes the Supabase session cookie.
@@ -35,9 +35,9 @@ No password sign-in in V1.
 1. User hits `/sign-in`.
 2. Picks Google or email.
 3. Google: redirect to Google → back to `/auth/callback?code=...`. Email: link in email → `/auth/callback?token_hash=...&type=email`.
-4. `app/(auth)/callback/route.ts` exchanges the code for a session cookie.
+4. `app/auth/callback/route.ts` exchanges the code for a session cookie.
 5. Postgres trigger `handle_new_user` creates the `profiles` row on first sign-in.
-6. Redirect to `next` if present, else `/studio`.
+6. Redirect to `next` if present, else `/`.
 
 ## Sign-out
 
@@ -69,6 +69,21 @@ on public.videos for update
 using (auth.uid() = creator_id)
 with check (auth.uid() = creator_id);create policy "videos_owner_delete"
 on public.videos for delete
+using (auth.uid() = creator_id);
+
+alter table public.pack_posts enable row level security;
+create policy "pack_posts_public_select"
+on public.pack_posts for select
+using (true);
+create policy "pack_posts_owner_insert"
+on public.pack_posts for insert
+with check (auth.uid() = creator_id);
+create policy "pack_posts_owner_update"
+on public.pack_posts for update
+using (auth.uid() = creator_id)
+with check (auth.uid() = creator_id);
+create policy "pack_posts_owner_delete"
+on public.pack_posts for delete
 using (auth.uid() = creator_id);
 
 ### Owner-only (sensitive)

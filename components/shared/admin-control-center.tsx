@@ -35,25 +35,12 @@ export function AdminControlCenter({ checklist }: { checklist: IntegrationItem[]
       name: "LiveKit webhook",
       configured: Boolean(process.env.LIVEKIT_WEBHOOK_SECRET),
     },
-    {
-      name: "SnapTrade webhook",
-      configured: Boolean(process.env.SNAPTRADE_WEBHOOK_SECRET),
-    },
-    {
-      name: "Stripe webhook",
-      configured: Boolean(process.env.STRIPE_WEBHOOK_SECRET),
-    },
   ];
 
   const cronRows = [
-    { name: "ticker summaries", ready: cronSecret && Boolean(process.env.OPENAI_API_KEY) },
-    { name: "news summaries", ready: cronSecret && Boolean(process.env.OPENAI_API_KEY) },
-    { name: "snaptrade sync", ready: cronSecret && Boolean(process.env.SNAPTRADE_CLIENT_ID) },
+    { name: "community digest", ready: cronSecret && Boolean(process.env.OPENAI_API_KEY) },
+    { name: "reputation maintenance", ready: cronSecret },
   ];
-  const marketMode = process.env.NEXT_PUBLIC_MARKET_DATA_MODE ?? "demo";
-  const marketProviderReady = Boolean(
-    process.env.MARKET_DATA_BASE_URL && process.env.MARKET_DATA_API_KEY,
-  );
 
   return (
     <section className="space-y-3">
@@ -130,25 +117,25 @@ export function AdminControlCenter({ checklist }: { checklist: IntegrationItem[]
         </article>
 
         <article className="glass-panel rounded-xl border p-4 space-y-2">
-          <p className="text-sm font-medium">Market feed readiness</p>
+          <p className="text-sm font-medium">Community trust readiness</p>
           <p className="text-muted-foreground text-xs">
-            Realtime tape mode and provider credentials health.
+            Verify identity, reputation, and feedback instrumentation are configured.
           </p>
           <ul className="space-y-1.5 text-xs">
             <li className="flex items-center justify-between gap-2 rounded-md border px-2 py-1.5">
-              <span>Frontend mode</span>
-              {marketMode === "provider" ? (
-                <StatusChip label="provider" tone="success" />
-              ) : (
-                <StatusChip label="demo" tone="warning" />
-              )}
-            </li>
-            <li className="flex items-center justify-between gap-2 rounded-md border px-2 py-1.5">
-              <span>Backend credentials</span>
-              {marketProviderReady ? (
+              <span>PostHog key</span>
+              {process.env.NEXT_PUBLIC_POSTHOG_KEY ? (
                 <StatusChip label="ready" tone="success" />
               ) : (
                 <StatusChip label="missing" tone="warning" />
+              )}
+            </li>
+            <li className="flex items-center justify-between gap-2 rounded-md border px-2 py-1.5">
+              <span>Sentry DSN</span>
+              {process.env.NEXT_PUBLIC_SENTRY_DSN ? (
+                <StatusChip label="ready" tone="success" />
+              ) : (
+                <StatusChip label="optional" tone="warning" />
               )}
             </li>
           </ul>

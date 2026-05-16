@@ -1,59 +1,52 @@
-md# Scope — V1
+# Scope — V1
 
-This document is the **canonical V1 scope**. If a feature is not on this list, treat it as out of scope.
+This document is the **canonical V1 scope** for the social pivot. If a feature is not on this list, treat it as out of scope.
 
 ## In V1
 
-### Public, no-login surfaces
+### Public surfaces
 
-- **Homepage** (`/`) — featured creators, trending videos, currently-live rooms, top tickers.
-- **Explore / public feed** (`/explore`) — recent and trending videos with simple filters (recent, popular, ticker).
-- **Live directory** (`/live`) — all currently-live rooms; sorted by viewer count.
-- **Public ticker pages** (`/t/[ticker]`) — symbol header (text only, **no chart**), AI summary, recent videos and live rooms tagged with this ticker.
-- **Creator profile** (`/@[handle]`) — bio, avatar, banner, social links, optional brokerage badge, video grid, scheduled live rooms. URL keeps the `@` via Next.js rewrite (see `routes.md`).
-- **Video watch page** (`/v/[videoId]`) — Mux player, title, description, creator strip, ticker chips, related videos.
-- **Live room watch page** (`/room/[roomId]`) — LiveKit viewer, **read-only chat for everyone except the creator and creator-invited co-hosts**, creator strip, ticker chips.
-- **Pricing page** (`/pricing`) — Premium plan listed; CTA captures interest. Stripe wiring scaffolded but Premium features inactive in V1.
+- **Homepage** (`/`) — trust-first discovery feed with category tabs, realtime community pulse, and recent creator content.
+- **Explore feed** (`/explore`) — ranked content discovery optimized for contribution quality and reputation signals.
+- **Live directory** (`/live`) — currently-live community rooms.
+- **Community hubs** (`/c/[slug]`) — topic/community pages with posts, live rooms, and related videos.
+- **Creator profile** (`/@[handle]`) — identity card, reputation panel, contributions, live sessions, and discussion context.
+- **Video watch page** (`/v/[videoId]`) — player, creator context, contribution feedback, comments, and related content.
+- **Live room page** (`/room/[roomId]`) — LiveKit viewer with chat/discussion and trust signals.
 
-### Creator surfaces (auth required)
+### Auth and identity
 
 - **Sign-in** (`/sign-in`) — Google OAuth + email magic link.
-- **Creator studio** (`/studio`) — overview.
-  - Videos list (`/studio/videos`).
-  - Upload (`/studio/upload`) — Mux direct upload + metadata + ticker tagging.
-  - Live (`/studio/live`) — schedule a room, get LiveKit credentials, go live, invite co-hosts (publisher tokens).
-  - Broker (`/studio/broker`) — SnapTrade connect, manage visibility toggles, disconnect.
-  - Settings (`/studio/settings`) — handle, profile, notification prefs.
+- **Profiles** — handle, display name, bio, avatar/banner, social links, and reputation indicators.
+- **Identity and trust** — profile-level contribution metrics and transparent reputation components.
 
-### Live chat policy (V1)
+### Creator and community tools
 
-- **Read**: anyone (anonymous included) sees chat messages.
-- **Write**: only the creator and co-hosts the creator explicitly invited via a one-time publisher-token link.
-- No anonymous chat writes. No viewer-account chat writes (viewer accounts are out of V1).
+- **Studio** (`/studio`) with:
+  - content upload (`/studio/upload`)
+  - video management (`/studio/videos`)
+  - live room management (`/studio/live`)
+  - profile/settings (`/studio/settings`)
+- **Community contribution signals**:
+  - helpful/not-helpful feedback
+  - consistency milestones
+  - reputation component scoring (explainable, not a black box)
 
-### AI features
+### Social interaction model
 
-- **Ticker summaries** — short, cached, AI-generated paragraph + bullet points on `/t/[ticker]`. Regeneration only via `/api/cron/ticker-summaries`.
-- **News summaries** — daily AI-summarized headlines per ticker. Regeneration only via `/api/cron/news-summaries`.
-
-### Creator brokerage link (read-only)
-
-- SnapTrade connect flow.
-- Read positions, balances, and recent activity windows. **No order endpoints used.**
-- Creator chooses which fields are visible publicly. See `docs/product/creator-broker-link.md`.
+- **Read/write comments** on watch and live surfaces according to moderation policy.
+- **Community participation** via posts, replies, and role-aware moderation.
+- **Meaningful interaction** prioritized over vanity metrics.
 
 ### Cross-cutting
 
-- Auth (Supabase) for creators only.
-- Database (Supabase Postgres) with RLS on every table.
-- Mux for VOD upload + playback.
-- LiveKit for live rooms; LiveKit Egress for recording, handed off to Mux on completion.
-- OpenAI for summaries (server-side, cached, cron-regenerated).
-- PostHog (EU cloud) for analytics, Sentry for errors, Resend for transactional email.
-- SEO: server-rendered metadata for all public pages.
-- Web only. PWA manifest is acceptable. No native shells.
-- Basic accessibility (semantic HTML, focus states, color contrast).
-- Rate limiting on every unauthenticated POST endpoint.
+- Supabase auth + Postgres with RLS.
+- Mux for VOD.
+- LiveKit for live sessions.
+- PostHog for analytics, Sentry for observability, Resend for transactional email.
+- SEO metadata for public routes.
+- Web only (PWA allowed), no native shells.
+- Basic accessibility and rate limiting on unauthenticated POST endpoints.
 
 ## Out of V1
 

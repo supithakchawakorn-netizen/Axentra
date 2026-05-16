@@ -45,7 +45,9 @@ export async function createDirectUpload(params: {
   const upload = await client().video.uploads.create({
     cors_origin: params.corsOrigin,
     new_asset_settings: {
-      playback_policies: params.visibility === "public" ? ["public"] : ["signed"],
+      // Test-launch default: keep playback public for both public and unlisted
+      // rows so watch-page playback works without implementing signed URL flow.
+      playback_policies: ["public"],
       max_resolution_tier: "1080p",
       video_quality: "basic",
     },

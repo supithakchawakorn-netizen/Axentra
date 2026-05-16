@@ -51,3 +51,20 @@ export async function getCurrentProfile(): Promise<PublicProfile | null> {
   }
   return (data as unknown as PublicProfile) ?? null;
 }
+
+export async function getProfileById(id: string): Promise<PublicProfile | null> {
+  if (!supabaseConfigured()) return null;
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("profiles")
+    .select(
+      "id, handle, display_name, avatar_url, banner_url, bio, verified_broker",
+    )
+    .eq("id", id)
+    .maybeSingle();
+  if (error) {
+    console.error("[getProfileById]", error.message);
+    return null;
+  }
+  return (data as unknown as PublicProfile) ?? null;
+}

@@ -7,7 +7,7 @@ export function siteUrl(): string {
   return raw.replace(/\/$/, "");
 }
 
-export const APP_NAME = "Axentra";
+export const APP_NAME = "Varg Packs";
 
 export const APP_DESCRIPTION =
-  "Watch market commentary on demand or live. Follow creators who link their brokerage read-only.";
+  "Community-first video and live platform for identity, trust, and contribution.";

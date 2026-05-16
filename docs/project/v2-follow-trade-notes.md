@@ -1,4 +1,4 @@
-md# V2 follow-trade notes (post-V1)
+# V2 follow-trade notes (post-V1)
 
 This document is forward-looking only. It does not change V1 scope.
 
@@ -12,7 +12,7 @@ individual linked brokerage accounts.
 
 - No pooled capital.
 - No fund-like or managed-money structure.
-- Axentra does not execute trades as principal/custodian.
+- Varg Packs does not execute trades as principal/custodian.
 - Execution happens through each viewer's own linked brokerage account.
 - Follow-trade implementation starts only after V1 is shipped.
 
